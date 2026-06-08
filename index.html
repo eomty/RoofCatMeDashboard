@@ -209,13 +209,32 @@ let chartInstances = {};
 
 function parseCSV(text) {
   const lines = text.trim().split('\n');
-  const header = lines[0].split(',');
+  const header = parseCSVLine(lines[0]);
+
   return lines.slice(1).map(line => {
-    const cols = line.split(',');
+    const cols = parseCSVLine(line);
     const obj = {};
     header.forEach((h,i) => obj[h.trim()] = (cols[i]||'').trim());
     return obj;
-  }).filter(r => r['날짜'] && r['채널']);
+  }).filter(r => r['날짜'] && (r['채널'] || r['그룹유형']));
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let cur = '', inQuote = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuote && line[i+1] === '"') { cur += '"'; i++; }
+      else inQuote = !inQuote;
+    } else if (ch === ',' && !inQuote) {
+      result.push(cur); cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  result.push(cur);
+  return result;
 }
 
 function buildMonthly(rows) {
