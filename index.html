@@ -114,6 +114,17 @@
   @media(max-width:900px){.sidebar{display:none}.content{margin-left:0;padding:16px}.grid-2{grid-template-columns:1fr}.span-2{grid-column:span 1}.metrics{grid-template-columns:repeat(2,1fr)}.nav-tabs{display:none}}
   @media(max-width:480px){.metrics{grid-template-columns:1fr 1fr}.month-calendar{grid-template-columns:repeat(4,1fr)}}
   .hidden{display:none!important}
+  .more-btn{font-size:11px;padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--gray-500);cursor:pointer;font-family:inherit;transition:all .15s}
+  .more-btn:hover{background:var(--gray-100);color:var(--gray-900)}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+  .modal-overlay.hidden{display:none!important}
+  .modal{background:var(--white);border-radius:var(--radius-lg);width:100%;max-width:520px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+  .modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);flex-shrink:0}
+  .modal-title{font-size:15px;font-weight:600;color:var(--gray-900)}
+  .modal-close{width:28px;height:28px;border-radius:50%;border:none;background:var(--gray-100);color:var(--gray-700);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .15s}
+  .modal-close:hover{background:var(--gray-300)}
+  .modal-body{overflow-y:auto;padding:16px 22px;flex:1}
+  .modal-sub{font-size:11px;color:var(--gray-500);margin-bottom:14px}
 </style>
 </head>
 <body>
@@ -141,6 +152,19 @@
     <div id="page-annual"><div class="loading"><div class="spinner"></div>데이터 불러오는 중...</div></div>
     <div id="page-monthly" class="hidden"></div>
   </main>
+</div>
+
+<div class="modal-overlay hidden" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title"></span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-sub" id="modal-sub"></p>
+      <div id="modal-content"></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -433,11 +457,13 @@ function renderAnnualPage() {
     <div class="grid grid-2">
       <div class="card">
         <div class="card-header"><span class="card-title">유입 채널 누계</span>
-          <div class="tab-group">
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="more-btn" onclick="openChModal(calcStats(Object.keys(MONTHLY).flatMap(k=>MONTHLY[k].rows)),'${tab}','유입 채널 전체 순위 (누계)')">전체보기</button>
+            <div class="tab-group">
             <button class="tab-btn ${tab==='all'?'active':''}" onclick="setChTab('annual','all')">전체</button>
             <button class="tab-btn ${tab==='dom'?'active':''}" onclick="setChTab('annual','dom')">국내</button>
             <button class="tab-btn ${tab==='for'?'active':''}" onclick="setChTab('annual','for')">국외</button>
-          </div>
+          </div></div>
         </div>
         <div class="bar-list" id="annual-bars"></div>
       </div>
@@ -446,7 +472,10 @@ function renderAnnualPage() {
         <div style="position:relative;height:200px"><canvas id="trendChart"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-header"><span class="card-title">국적 구성 누계 상위 10</span></div>
+        <div class="card-header">
+          <span class="card-title">국적 구성 누계 상위 10</span>
+          <button class="more-btn" onclick="openNatModal(calcStats(Object.keys(MONTHLY).flatMap(k=>MONTHLY[k].rows)),'국적 구성 전체 순위 (누계)')">전체보기</button>
+        </div>
         <div class="nat-list" id="annual-nat"></div>
       </div>
       <div class="card">
@@ -504,16 +533,22 @@ function renderMonthlyPage(m) {
     <div class="grid grid-2">
       <div class="card">
         <div class="card-header"><span class="card-title">유입 채널 분석</span>
-          <div class="tab-group">
-            <button class="tab-btn ${tab==='all'?'active':''}" onclick="setChTab('monthly','all')">전체</button>
-            <button class="tab-btn ${tab==='dom'?'active':''}" onclick="setChTab('monthly','dom')">국내</button>
-            <button class="tab-btn ${tab==='for'?'active':''}" onclick="setChTab('monthly','for')">국외</button>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="more-btn" onclick="openChModal(stats,'${tab}','${MONTHS_KR[m-1]} 유입 채널 전체 순위')">전체보기</button>
+            <div class="tab-group">
+              <button class="tab-btn ${tab==='all'?'active':''}" onclick="setChTab('monthly','all')">전체</button>
+              <button class="tab-btn ${tab==='dom'?'active':''}" onclick="setChTab('monthly','dom')">국내</button>
+              <button class="tab-btn ${tab==='for'?'active':''}" onclick="setChTab('monthly','for')">국외</button>
+            </div>
           </div>
         </div>
         <div class="bar-list" id="monthly-bars"></div>
       </div>
       <div class="card">
-        <div class="card-header"><span class="card-title">국적 구성 상위 8</span></div>
+        <div class="card-header">
+          <span class="card-title">국적 구성 상위 8</span>
+          <button class="more-btn" onclick="openNatModal(stats,'${MONTHS_KR[m-1]} 국적 구성 전체 순위')">전체보기</button>
+        </div>
         <div class="nat-list" id="monthly-nat"></div>
       </div>
       <div class="card">
@@ -564,6 +599,47 @@ function setTypeTab(page, tab) {
     renderTypes('monthly-types', calcStats(MONTHLY[`2026-${currentMonth}`].rows), tab);
   }
 }
+
+function openChModal(stats, tab, title) {
+  const list = tab==='dom'?stats.ch_dom:tab==='for'?stats.ch_for:stats.ch_all;
+  const max = Math.max(...list.map(d=>d.pct));
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-sub').textContent = `전체 ${list.length}개 채널 · 응답 ${list.reduce((s,d)=>s+d.cnt,0)}건`;
+  document.getElementById('modal-content').innerHTML = `<div class="bar-list">${
+    list.map((d,i)=>`
+      <div class="bar-row">
+        <span class="bar-rank">${i+1}</span>
+        <span class="bar-label" title="${d.name}" style="width:90px">${d.name}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${(d.pct/max*100).toFixed(1)}%;background:${d.color||'#888780'}"></div></div>
+        <span class="bar-pct">${d.pct}%</span>
+        <span class="bar-cnt">${d.cnt}건</span>
+      </div>`).join('')
+  }</div>`;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function openNatModal(stats, title) {
+  const list = stats.nat;
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-sub').textContent = `전체 ${list.length}개 국적 · 총 ${list.reduce((s,n)=>s+n.cnt,0)}건`;
+  document.getElementById('modal-content').innerHTML = `<div class="nat-list">${
+    list.map((n,i)=>`
+      <div class="nat-row">
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--gray-500);width:20px;text-align:right">${i+1}</span>
+          <span>${n.name}</span>
+        </span>
+        <span class="nat-val">${n.cnt}건 · ${n.pct}%</span>
+      </div>`).join('')
+  }</div>`;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.add('hidden');
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') document.getElementById('modal-overlay').classList.add('hidden'); });
 
 loadData();
 </script>
