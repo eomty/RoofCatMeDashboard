@@ -7,817 +7,432 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --blue-dark: #0C447C;
-    --blue-mid: #185FA5;
-    --blue-light: #378ADD;
-    --blue-pale: #E6F1FB;
-    --green-dark: #27500A;
-    --green-mid: #3B6D11;
-    --green-pale: #EAF3DE;
-    --pink-mid: #993556;
-    --amber-mid: #BA7517;
-    --amber-pale: #FAEEDA;
-    --gray-900: #1a1a18;
-    --gray-700: #444441;
-    --gray-500: #888780;
-    --gray-300: #d3d1c7;
-    --gray-100: #f1efe8;
-    --white: #ffffff;
-    --border: rgba(0,0,0,0.08);
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 14px;
-    --nav-h: 54px;
-    --sidebar-w: 220px;
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --blue-dark:#0C447C;--blue-mid:#185FA5;--blue-light:#378ADD;--blue-pale:#E6F1FB;
+    --green-dark:#27500A;--green-pale:#EAF3DE;
+    --gray-900:#1a1a18;--gray-700:#444441;--gray-500:#888780;--gray-300:#d3d1c7;--gray-100:#f1efe8;
+    --white:#ffffff;--border:rgba(0,0,0,0.08);
+    --radius-sm:6px;--radius-md:10px;--radius-lg:14px;
+    --nav-h:54px;--sidebar-w:220px;
   }
-
-  body {
-    font-family: 'Noto Sans KR', sans-serif;
-    background: var(--gray-100);
-    color: var(--gray-900);
-    font-size: 14px;
-    min-height: 100vh;
-  }
-
-  /* NAV */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0; height: var(--nav-h);
-    background: var(--white);
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center;
-    padding: 0 24px; gap: 20px; z-index: 100;
-  }
-  .nav-logo {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 14px; font-weight: 600; color: var(--gray-900);
-    text-decoration: none;
-  }
-  .nav-dot { width: 8px; height: 8px; background: var(--blue-mid); border-radius: 50%; flex-shrink: 0; }
-  .nav-divider { width: 1px; height: 18px; background: var(--border); }
-  .nav-tabs { display: flex; gap: 4px; }
-  .nav-tab {
-    padding: 5px 14px; border-radius: var(--radius-sm); font-size: 13px;
-    border: none; background: transparent; color: var(--gray-500);
-    cursor: pointer; font-family: inherit; font-weight: 400; transition: all .15s;
-  }
-  .nav-tab:hover { background: var(--gray-100); color: var(--gray-900); }
-  .nav-tab.active { background: var(--blue-pale); color: var(--blue-dark); font-weight: 500; }
-  .nav-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-  .upload-btn {
-    display: flex; align-items: center; gap: 6px;
-    padding: 6px 14px; border-radius: var(--radius-sm);
-    background: var(--blue-mid); color: white; border: none;
-    font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit;
-    transition: background .15s;
-  }
-  .upload-btn:hover { background: var(--blue-dark); }
-
-  /* LAYOUT */
-  .layout { display: flex; padding-top: var(--nav-h); min-height: 100vh; }
-  .sidebar {
-    width: var(--sidebar-w); flex-shrink: 0;
-    position: fixed; top: var(--nav-h); bottom: 0; left: 0;
-    background: var(--white); border-right: 1px solid var(--border);
-    overflow-y: auto; padding: 20px 12px;
-  }
-  .sidebar-section-title {
-    font-size: 10px; font-weight: 600; color: var(--gray-500);
-    text-transform: uppercase; letter-spacing: .06em;
-    padding: 0 8px; margin: 16px 0 6px;
-  }
-  .sidebar-section-title:first-child { margin-top: 0; }
-  .month-item {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 7px 10px; border-radius: var(--radius-sm); cursor: pointer;
-    font-size: 13px; color: var(--gray-500); transition: all .15s;
-    margin-bottom: 2px; border: none; background: transparent;
-    width: 100%; text-align: left; font-family: inherit;
-  }
-  .month-item:hover { background: var(--gray-100); color: var(--gray-900); }
-  .month-item.has-data { color: var(--gray-900); }
-  .month-item.active { background: var(--blue-pale); color: var(--blue-dark); font-weight: 500; }
-  .month-badge {
-    font-size: 10px; padding: 1px 6px; border-radius: 10px;
-    background: var(--green-pale); color: var(--green-dark);
-  }
-  .month-item.active .month-badge { background: var(--blue-mid); color: white; }
-  .main-item {
-    display: flex; align-items: center; gap: 8px;
-    padding: 8px 10px; border-radius: var(--radius-sm); cursor: pointer;
-    font-size: 13px; font-weight: 500; color: var(--gray-900);
-    transition: all .15s; margin-bottom: 4px;
-    border: none; background: transparent; width: 100%;
-    text-align: left; font-family: inherit;
-  }
-  .main-item:hover { background: var(--gray-100); }
-  .main-item.active { background: var(--blue-pale); color: var(--blue-dark); }
-
-  /* MAIN CONTENT */
-  .content { margin-left: var(--sidebar-w); flex: 1; padding: 28px 28px; min-width: 0; }
-
-  /* PAGE HEADER */
-  .page-header { margin-bottom: 24px; }
-  .page-badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 11px; padding: 3px 10px; border-radius: 20px; margin-bottom: 8px;
-  }
-  .page-badge.annual { background: var(--blue-pale); color: var(--blue-dark); }
-  .page-badge.monthly { background: var(--green-pale); color: var(--green-dark); }
-  .page-title { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
-  .page-sub { font-size: 13px; color: var(--gray-500); }
-  .month-nav { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
-  .month-nav-btn {
-    padding: 4px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);
-    background: white; font-size: 12px; cursor: pointer; font-family: inherit;
-    color: var(--gray-700); transition: all .15s;
-  }
-  .month-nav-btn:hover:not(:disabled) { background: var(--gray-100); }
-  .month-nav-btn:disabled { opacity: .35; cursor: default; }
-  .month-nav-current { font-size: 14px; font-weight: 500; }
-
-  /* METRICS */
-  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
-  .metric-card {
-    background: var(--white); border-radius: var(--radius-md);
-    border: 1px solid var(--border); padding: 16px 18px;
-  }
-  .metric-label { font-size: 11px; color: var(--gray-500); margin-bottom: 4px; }
-  .metric-value { font-size: 24px; font-weight: 600; line-height: 1.1; margin-bottom: 2px; }
-  .metric-note { font-size: 11px; color: var(--gray-500); }
-  .metric-up { color: var(--green-mid); font-size: 11px; }
-  .metric-down { color: #E24B4A; font-size: 11px; }
-
-  /* GRID */
-  .grid { display: grid; gap: 16px; margin-bottom: 16px; }
-  .grid-2 { grid-template-columns: 1fr 1fr; }
-  .grid-3 { grid-template-columns: 2fr 1fr 1fr; }
-  .span-2 { grid-column: span 2; }
-
-  /* CARD */
-  .card {
-    background: var(--white); border-radius: var(--radius-lg);
-    border: 1px solid var(--border); padding: 20px 22px;
-  }
-  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-  .card-title { font-size: 12px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: .05em; }
-
-  /* TABS */
-  .tab-group { display: flex; gap: 3px; }
-  .tab-btn {
-    padding: 4px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);
-    background: transparent; font-size: 12px; cursor: pointer; font-family: inherit;
-    color: var(--gray-500); transition: all .15s;
-  }
-  .tab-btn:hover { background: var(--gray-100); }
-  .tab-btn.active { background: var(--blue-pale); color: var(--blue-dark); border-color: transparent; font-weight: 500; }
-
-  /* BAR CHART */
-  .bar-list { display: flex; flex-direction: column; gap: 8px; }
-  .bar-row { display: flex; align-items: center; gap: 10px; }
-  .bar-rank { font-size: 10px; color: var(--gray-500); width: 14px; text-align: right; flex-shrink: 0; }
-  .bar-label { font-size: 12px; color: var(--gray-900); width: 80px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .bar-track { flex: 1; height: 7px; background: var(--gray-100); border-radius: 4px; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 4px; transition: width .5s ease; }
-  .bar-pct { font-size: 12px; color: var(--gray-500); width: 38px; text-align: right; flex-shrink: 0; }
-  .bar-cnt { font-size: 11px; color: var(--gray-300); width: 32px; text-align: right; flex-shrink: 0; }
-
-  /* NATIONALITY */
-  .nat-list { display: flex; flex-direction: column; gap: 0; }
-  .nat-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--gray-100); font-size: 12px; }
-  .nat-row:last-child { border-bottom: none; }
-  .nat-name { color: var(--gray-900); }
-  .nat-val { color: var(--gray-500); }
-
-  /* VISIT TYPE */
-  .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .type-card { background: var(--gray-100); border-radius: var(--radius-sm); padding: 12px 14px; }
-  .type-name { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
-  .type-pct { font-size: 12px; color: var(--gray-500); margin-bottom: 6px; }
-  .type-top { font-size: 11px; color: var(--gray-500); line-height: 1.5; }
-
-  /* TREND CHART */
-  .trend-section { display: flex; flex-direction: column; gap: 6px; }
-  .trend-bars { display: flex; align-items: flex-end; gap: 6px; height: 120px; }
-  .trend-col { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
-  .trend-bar-wrap { display: flex; align-items: flex-end; gap: 2px; width: 100%; }
-  .trend-bar { border-radius: 3px 3px 0 0; transition: height .5s ease; }
-  .trend-month { font-size: 10px; color: var(--gray-500); text-align: center; }
-  .trend-count { font-size: 10px; color: var(--gray-500); text-align: center; }
-
-  /* TIME CHART */
-  .time-chart { display: flex; align-items: flex-end; gap: 4px; height: 100px; }
-  .time-col { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; }
-  .time-bar-wrap { display: flex; align-items: flex-end; gap: 1px; width: 100%; justify-content: center; }
-  .time-lbl { font-size: 9px; color: var(--gray-500); }
-  .time-peak { color: var(--amber-mid); font-weight: 600; }
-  .time-legend { display: flex; gap: 12px; margin-bottom: 8px; }
-  .legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--gray-500); }
-  .legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
-
-  /* INSIGHT */
-  .insight-list { display: flex; flex-direction: column; gap: 0; }
-  .insight-row { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--gray-100); font-size: 12px; line-height: 1.6; align-items: flex-start; }
-  .insight-row:last-child { border-bottom: none; }
-  .insight-icon { color: var(--blue-mid); flex-shrink: 0; font-size: 14px; margin-top: 1px; }
-  strong { font-weight: 600; }
-
-  /* MONTH CALENDAR (main page) */
-  .month-calendar { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
-  .cal-month {
-    border: 1px solid var(--border); border-radius: var(--radius-sm);
-    padding: 8px 6px; text-align: center; cursor: pointer;
-    transition: all .15s; background: var(--white);
-  }
-  .cal-month:hover { border-color: var(--blue-light); }
-  .cal-month.has-data { border-color: var(--blue-light); background: var(--blue-pale); }
-  .cal-month.no-data { cursor: default; opacity: .5; }
-  .cal-month-name { font-size: 12px; font-weight: 500; color: var(--blue-dark); }
-  .cal-month.no-data .cal-month-name { color: var(--gray-500); }
-  .cal-count { font-size: 10px; color: var(--blue-mid); margin-top: 2px; }
-  .cal-month.no-data .cal-count { color: var(--gray-300); }
-
-  /* UPLOAD ZONE */
-  .upload-zone {
-    border: 2px dashed var(--gray-300); border-radius: var(--radius-md);
-    padding: 24px; text-align: center; transition: all .15s;
-    cursor: pointer;
-  }
-  .upload-zone:hover, .upload-zone.dragover { border-color: var(--blue-mid); background: var(--blue-pale); }
-  .upload-zone-title { font-size: 13px; font-weight: 500; color: var(--gray-700); margin-bottom: 4px; }
-  .upload-zone-sub { font-size: 11px; color: var(--gray-500); }
-
-  /* RESPONSIVE */
-  @media (max-width: 900px) {
-    .sidebar { display: none; }
-    .content { margin-left: 0; padding: 16px; }
-    .grid-2, .grid-3 { grid-template-columns: 1fr; }
-    .span-2 { grid-column: span 1; }
-    .metrics { grid-template-columns: repeat(2, 1fr); }
-    nav { padding: 0 16px; }
-    .nav-tabs { display: none; }
-  }
-  @media (max-width: 480px) {
-    .metrics { grid-template-columns: 1fr 1fr; }
-    .month-calendar { grid-template-columns: repeat(4, 1fr); }
-  }
-
-  /* UTILS */
-  .hidden { display: none !important; }
-  .text-muted { color: var(--gray-500); }
-  .divider { border: none; border-top: 1px solid var(--gray-100); margin: 20px 0; }
+  body{font-family:'Noto Sans KR',sans-serif;background:var(--gray-100);color:var(--gray-900);font-size:14px;min-height:100vh}
+  nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;z-index:100}
+  .nav-logo{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--gray-900);text-decoration:none}
+  .nav-dot{width:8px;height:8px;background:var(--blue-mid);border-radius:50%;flex-shrink:0}
+  .nav-divider{width:1px;height:18px;background:var(--border)}
+  .nav-tabs{display:flex;gap:4px}
+  .nav-tab{padding:5px 14px;border-radius:var(--radius-sm);font-size:13px;border:none;background:transparent;color:var(--gray-500);cursor:pointer;font-family:inherit;transition:all .15s}
+  .nav-tab:hover{background:var(--gray-100);color:var(--gray-900)}
+  .nav-tab.active{background:var(--blue-pale);color:var(--blue-dark);font-weight:500}
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .last-updated{font-size:11px;color:var(--gray-500)}
+  .refresh-btn{padding:6px 14px;border-radius:var(--radius-sm);background:var(--blue-mid);color:white;border:none;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s}
+  .refresh-btn:hover{background:var(--blue-dark)}
+  .layout{display:flex;padding-top:var(--nav-h);min-height:100vh}
+  .sidebar{width:var(--sidebar-w);flex-shrink:0;position:fixed;top:var(--nav-h);bottom:0;left:0;background:var(--white);border-right:1px solid var(--border);overflow-y:auto;padding:16px 12px}
+  .sidebar-label{font-size:10px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.06em;padding:0 8px;margin:16px 0 6px;display:block}
+  .sidebar-label:first-child{margin-top:0}
+  .month-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;color:var(--gray-500);transition:all .15s;margin-bottom:2px;border:none;background:transparent;width:100%;text-align:left;font-family:inherit}
+  .month-item:hover{background:var(--gray-100);color:var(--gray-900)}
+  .month-item.has-data{color:var(--gray-900)}
+  .month-item.active{background:var(--blue-pale);color:var(--blue-dark);font-weight:500}
+  .month-badge{font-size:10px;padding:1px 6px;border-radius:10px;background:var(--green-pale);color:var(--green-dark)}
+  .month-item.active .month-badge{background:var(--blue-mid);color:white}
+  .main-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-weight:500;color:var(--gray-900);transition:all .15s;margin-bottom:4px;border:none;background:transparent;width:100%;text-align:left;font-family:inherit}
+  .main-item:hover{background:var(--gray-100)}
+  .main-item.active{background:var(--blue-pale);color:var(--blue-dark)}
+  .content{margin-left:var(--sidebar-w);flex:1;padding:28px;min-width:0}
+  .page-header{margin-bottom:24px}
+  .page-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 10px;border-radius:20px;margin-bottom:8px}
+  .page-badge.annual{background:var(--blue-pale);color:var(--blue-dark)}
+  .page-badge.monthly{background:var(--green-pale);color:var(--green-dark)}
+  .page-title{font-size:22px;font-weight:600;margin-bottom:4px}
+  .page-sub{font-size:13px;color:var(--gray-500)}
+  .month-nav{display:flex;align-items:center;gap:8px;margin-top:12px}
+  .month-nav-btn{padding:4px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:white;font-size:12px;cursor:pointer;font-family:inherit;color:var(--gray-700);transition:all .15s}
+  .month-nav-btn:hover:not(:disabled){background:var(--gray-100)}
+  .month-nav-btn:disabled{opacity:.35;cursor:default}
+  .month-nav-current{font-size:14px;font-weight:500}
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+  .metric-card{background:var(--white);border-radius:var(--radius-md);border:1px solid var(--border);padding:16px 18px}
+  .metric-label{font-size:11px;color:var(--gray-500);margin-bottom:4px}
+  .metric-value{font-size:24px;font-weight:600;line-height:1.1;margin-bottom:2px}
+  .metric-note{font-size:11px;color:var(--gray-500)}
+  .metric-up{color:#3B6D11;font-size:11px}
+  .metric-down{color:#E24B4A;font-size:11px}
+  .grid{display:grid;gap:16px;margin-bottom:16px}
+  .grid-2{grid-template-columns:1fr 1fr}
+  .span-2{grid-column:span 2}
+  .card{background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--border);padding:20px 22px}
+  .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .card-title{font-size:12px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em}
+  .tab-group{display:flex;gap:3px}
+  .tab-btn{padding:4px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;font-size:12px;cursor:pointer;font-family:inherit;color:var(--gray-500);transition:all .15s}
+  .tab-btn:hover{background:var(--gray-100)}
+  .tab-btn.active{background:var(--blue-pale);color:var(--blue-dark);border-color:transparent;font-weight:500}
+  .bar-list{display:flex;flex-direction:column;gap:8px}
+  .bar-row{display:flex;align-items:center;gap:10px}
+  .bar-rank{font-size:10px;color:var(--gray-500);width:14px;text-align:right;flex-shrink:0}
+  .bar-label{font-size:12px;color:var(--gray-900);width:82px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar-track{flex:1;height:7px;background:var(--gray-100);border-radius:4px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+  .bar-pct{font-size:12px;color:var(--gray-500);width:38px;text-align:right;flex-shrink:0}
+  .bar-cnt{font-size:11px;color:var(--gray-300);width:32px;text-align:right;flex-shrink:0}
+  .nat-list{display:flex;flex-direction:column}
+  .nat-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--gray-100);font-size:12px}
+  .nat-row:last-child{border-bottom:none}
+  .nat-val{color:var(--gray-500)}
+  .type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .type-card{background:var(--gray-100);border-radius:var(--radius-sm);padding:12px 14px}
+  .type-name{font-size:14px;font-weight:500;margin-bottom:2px}
+  .type-pct{font-size:12px;color:var(--gray-500);margin-bottom:6px}
+  .type-top{font-size:11px;color:var(--gray-500);line-height:1.5}
+  .time-chart{display:flex;align-items:flex-end;gap:4px;height:100px}
+  .time-col{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1}
+  .time-bar-wrap{display:flex;align-items:flex-end;gap:1px;width:100%;justify-content:center}
+  .time-lbl{font-size:9px;color:var(--gray-500);text-align:center;line-height:1.3}
+  .time-peak{color:#BA7517;font-weight:600}
+  .time-legend{display:flex;gap:12px;margin-bottom:8px}
+  .legend-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--gray-500)}
+  .legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+  .insight-list{display:flex;flex-direction:column}
+  .insight-row{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--gray-100);font-size:12px;line-height:1.6;align-items:flex-start}
+  .insight-row:last-child{border-bottom:none}
+  .insight-dot{width:6px;height:6px;border-radius:50%;background:var(--blue-mid);margin-top:5px;flex-shrink:0}
+  .month-calendar{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+  .cal-month{border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 6px;text-align:center;cursor:pointer;transition:all .15s;background:var(--white)}
+  .cal-month:hover.has-data{border-color:var(--blue-light)}
+  .cal-month.has-data{border-color:var(--blue-light);background:var(--blue-pale);cursor:pointer}
+  .cal-month.no-data{cursor:default;opacity:.4}
+  .cal-month-name{font-size:12px;font-weight:500;color:var(--blue-dark)}
+  .cal-month.no-data .cal-month-name{color:var(--gray-500)}
+  .cal-count{font-size:10px;color:var(--blue-mid);margin-top:2px}
+  .loading{display:flex;align-items:center;justify-content:center;height:300px;flex-direction:column;gap:12px;color:var(--gray-500)}
+  .spinner{width:28px;height:28px;border:3px solid var(--gray-300);border-top-color:var(--blue-mid);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media(max-width:900px){.sidebar{display:none}.content{margin-left:0;padding:16px}.grid-2{grid-template-columns:1fr}.span-2{grid-column:span 1}.metrics{grid-template-columns:repeat(2,1fr)}.nav-tabs{display:none}}
+  @media(max-width:480px){.metrics{grid-template-columns:1fr 1fr}.month-calendar{grid-template-columns:repeat(4,1fr)}}
+  .hidden{display:none!important}
 </style>
 </head>
 <body>
 
 <nav>
-  <a class="nav-logo" href="#"><div class="nav-dot"></div>루프캣미 홍대점</a>
+  <div class="nav-logo"><div class="nav-dot"></div>루프캣미 홍대점</div>
   <div class="nav-divider"></div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('annual')">연간 누계</button>
-    <button class="nav-tab" onclick="showPage('monthly', null, this)">월별 상세</button>
+    <button class="nav-tab" onclick="showPage('monthly')">월별 상세</button>
   </div>
   <div class="nav-right">
-    <button class="upload-btn" onclick="document.getElementById('csvInput').click()">
-      ＋ CSV 업로드
-    </button>
-    <input type="file" id="csvInput" accept=".csv" style="display:none" onchange="handleCSV(event)">
+    <span class="last-updated" id="last-updated"></span>
+    <button class="refresh-btn" onclick="loadData()">↻ 새로고침</button>
   </div>
 </nav>
 
 <div class="layout">
   <aside class="sidebar">
-    <button class="main-item active" id="sidebar-annual" onclick="showPage('annual')">
-      📊 연간 누계
-    </button>
-    <div class="sidebar-section-title">월별 상세</div>
+    <button class="main-item active" id="sidebar-annual" onclick="showPage('annual')">📊 연간 누계</button>
+    <span class="sidebar-label">월별 상세</span>
     <div id="sidebar-months"></div>
   </aside>
-
   <main class="content">
-    <div id="page-annual"></div>
+    <div id="page-annual"><div class="loading"><div class="spinner"></div>데이터 불러오는 중...</div></div>
     <div id="page-monthly" class="hidden"></div>
   </main>
 </div>
 
 <script>
-const DATA = {
-  3: {
-    label: '3월', period: '2026.03.11 – 2026.03.31',
-    total: 329, ch_total: 332,
-    domestic: 191, foreign: 134, mixed: 4,
-    top1_ch: '네이버 검색', top1_pct: 25.6,
-    has_time: false,
-    ch_all: [
-      {name:'네이버 검색',cnt:85,pct:25.6,color:'#185FA5'},
-      {name:'워크인',cnt:70,pct:21.1,color:'#185FA5'},
-      {name:'재방문',cnt:49,pct:14.8,color:'#185FA5'},
-      {name:'네이버지도',cnt:33,pct:9.9,color:'#185FA5'},
-      {name:'구글 검색',cnt:24,pct:7.2,color:'#888780'},
-      {name:'인스타(타인)',cnt:14,pct:4.2,color:'#993556'},
-      {name:'지인 추천',cnt:10,pct:3.0,color:'#888780'},
-      {name:'틱톡',cnt:10,pct:3.0,color:'#0F6E56'},
-      {name:'인스타(공식)',cnt:15,pct:4.5,color:'#993556'},
-      {name:'구글 지도',cnt:6,pct:1.8,color:'#888780'},
-      {name:'AI 검색',cnt:4,pct:1.2,color:'#888780'},
-      {name:'카카오맵',cnt:4,pct:1.2,color:'#888780'},
-      {name:'샤오홍슈',cnt:3,pct:0.9,color:'#888780'},
-      {name:'주렁주렁',cnt:5,pct:1.5,color:'#888780'},
-    ],
-    ch_dom: [
-      {name:'네이버 검색',cnt:75,pct:36.4,color:'#185FA5'},
-      {name:'재방문',cnt:37,pct:18.0,color:'#185FA5'},
-      {name:'네이버지도',cnt:26,pct:12.6,color:'#185FA5'},
-      {name:'워크인',cnt:16,pct:7.8,color:'#185FA5'},
-      {name:'인스타(타인)',cnt:11,pct:5.3,color:'#993556'},
-      {name:'인스타(공식)',cnt:11,pct:5.3,color:'#993556'},
-      {name:'지인 추천',cnt:3,pct:1.5,color:'#888780'},
-      {name:'구글 검색',cnt:8,pct:3.9,color:'#888780'},
-      {name:'주렁주렁',cnt:4,pct:1.9,color:'#888780'},
-      {name:'카카오맵',cnt:4,pct:1.9,color:'#888780'},
-    ],
-    ch_for: [
-      {name:'워크인',cnt:54,pct:36.2,color:'#185FA5'},
-      {name:'구글 검색',cnt:16,pct:10.7,color:'#888780'},
-      {name:'재방문',cnt:12,pct:8.1,color:'#185FA5'},
-      {name:'틱톡',cnt:9,pct:6.0,color:'#0F6E56'},
-      {name:'구글 지도',cnt:6,pct:4.0,color:'#888780'},
-      {name:'네이버 검색',cnt:10,pct:6.7,color:'#185FA5'},
-      {name:'인스타(타인)',cnt:4,pct:2.7,color:'#993556'},
-      {name:'네이버지도',cnt:7,pct:4.7,color:'#185FA5'},
-      {name:'지인 추천',cnt:6,pct:4.0,color:'#888780'},
-      {name:'인스타(공식)',cnt:4,pct:2.7,color:'#993556'},
-      {name:'AI 검색',cnt:3,pct:2.0,color:'#888780'},
-      {name:'샤오홍슈',cnt:3,pct:2.0,color:'#888780'},
-    ],
-    nat: [
-      {name:'한국',cnt:191,pct:58.1},
-      {name:'서양(통합)',cnt:37,pct:11.2},
-      {name:'미국',cnt:24,pct:7.3},
-      {name:'한국/아시아 혼합',cnt:21,pct:6.4},
-      {name:'중국',cnt:11,pct:3.3},
-      {name:'일본',cnt:9,pct:2.7},
-      {name:'독일',cnt:6,pct:1.8},
-      {name:'싱가포르',cnt:5,pct:1.5},
-      {name:'프랑스',cnt:5,pct:1.5},
-      {name:'기타',cnt:20,pct:6.1},
-    ],
-    types_all: [
-      {name:'가족',cnt:109,pct:33.1,top:'네이버검색(68), 재방문(58), 구글검색(18+)'},
-      {name:'커플',cnt:124,pct:37.7,top:'네이버검색(57), 워크인(51), 인스타타인(15+)'},
-      {name:'친구',cnt:70,pct:21.3,top:'워크인(41), 네이버검색(35), 재방문(11+)'},
-      {name:'1인',cnt:26,pct:7.9,top:'재방문(22), 워크인(15), 네이버검색(14)'},
-    ],
-    types_dom: [
-      {name:'가족',cnt:69,pct:36.1,top:'네이버검색(34+), 재방문(25+), 네이버지도(9+)'},
-      {name:'커플',cnt:76,pct:39.8,top:'네이버검색(26+), 네이버지도(11+), 재방문(11+)'},
-      {name:'친구',cnt:37,pct:19.4,top:'네이버검색(17+), 재방문(8+), 워크인(7+)'},
-      {name:'1인',cnt:9,pct:4.7,top:'재방문(12+), 네이버검색(8+), 네이버지도(3+)'},
-    ],
-    types_for: [
-      {name:'가족',cnt:40,pct:29.9,top:'구글검색(16+), 워크인(14+), 재방문(6+)'},
-      {name:'커플',cnt:48,pct:35.8,top:'워크인(17+), 구글검색(8+), 구글지도(6+)'},
-      {name:'친구',cnt:33,pct:24.6,top:'워크인(17+), 틱톡(8+), 구글검색(3+)'},
-      {name:'1인',cnt:13,pct:9.7,top:'워크인(10+), 구글지도(7+), 네이버검색(2+)'},
-    ],
-    insights: [
-      '네이버 검색(25.6%) + 네이버지도(9.9%) 합산 <strong>35.5%</strong> — 국내 핵심 채널',
-      '워크인(21.1%) + 재방문(14.8%) 합산 <strong>35.9%</strong>',
-      '인스타(타인) 14건, 틱톡 10건 — SNS 유입 증가 추세 시작',
-      'AI 검색(챗GPT·제미나이) 4건, 카카오맵 4건 — <strong>신규 채널 첫 등장</strong>',
-      '외국인 1위 채널 워크인(36.2%) — 오프라인 노출 효과 확인',
-    ],
-  },
-  4: {
-    label: '4월', period: '2026.04.01 – 2026.04.30',
-    total: 498, ch_total: 422,
-    domestic: 266, foreign: 199, mixed: 10,
-    top1_ch: '네이버 검색', top1_pct: 22.0,
-    has_time: false,
-    ch_all: [
-      {name:'네이버 검색',cnt:93,pct:22.0,color:'#185FA5'},
-      {name:'워크인',cnt:78,pct:18.5,color:'#185FA5'},
-      {name:'재방문',cnt:69,pct:16.4,color:'#185FA5'},
-      {name:'네이버지도',cnt:37,pct:8.8,color:'#185FA5'},
-      {name:'구글 검색',cnt:32,pct:7.6,color:'#888780'},
-      {name:'인스타(타인)',cnt:30,pct:7.1,color:'#993556'},
-      {name:'지인 추천',cnt:19,pct:4.5,color:'#888780'},
-      {name:'틱톡',cnt:19,pct:4.5,color:'#0F6E56'},
-      {name:'인스타(공식)',cnt:13,pct:3.1,color:'#993556'},
-      {name:'구글 지도',cnt:17,pct:4.0,color:'#888780'},
-      {name:'온라인예매처',cnt:6,pct:1.4,color:'#888780'},
-      {name:'블로그',cnt:5,pct:1.2,color:'#888780'},
-      {name:'명동점 경유',cnt:4,pct:0.9,color:'#888780'},
-    ],
-    ch_dom: [
-      {name:'네이버 검색',cnt:85,pct:36.5,color:'#185FA5'},
-      {name:'재방문',cnt:56,pct:24.0,color:'#185FA5'},
-      {name:'네이버지도',cnt:27,pct:11.6,color:'#185FA5'},
-      {name:'워크인',cnt:20,pct:8.6,color:'#185FA5'},
-      {name:'인스타(타인)',cnt:17,pct:7.3,color:'#993556'},
-      {name:'인스타(공식)',cnt:7,pct:3.0,color:'#993556'},
-      {name:'지인 추천',cnt:12,pct:5.2,color:'#888780'},
-      {name:'구글 검색',cnt:3,pct:1.3,color:'#888780'},
-      {name:'온라인예매처',cnt:3,pct:1.3,color:'#888780'},
-    ],
-    ch_for: [
-      {name:'워크인',cnt:58,pct:33.1,color:'#185FA5'},
-      {name:'구글 검색',cnt:29,pct:16.6,color:'#888780'},
-      {name:'재방문',cnt:13,pct:7.4,color:'#185FA5'},
-      {name:'틱톡',cnt:16,pct:9.1,color:'#0F6E56'},
-      {name:'구글 지도',cnt:16,pct:9.1,color:'#888780'},
-      {name:'네이버 검색',cnt:8,pct:4.6,color:'#185FA5'},
-      {name:'인스타(타인)',cnt:11,pct:6.3,color:'#993556'},
-      {name:'네이버지도',cnt:8,pct:4.6,color:'#185FA5'},
-      {name:'지인 추천',cnt:5,pct:2.9,color:'#888780'},
-      {name:'인스타(공식)',cnt:6,pct:3.4,color:'#993556'},
-      {name:'명동점 경유',cnt:3,pct:1.7,color:'#888780'},
-      {name:'온라인예매처',cnt:2,pct:1.1,color:'#888780'},
-    ],
-    nat: [
-      {name:'한국',cnt:266,pct:53.4},
-      {name:'서양(통합)',cnt:63,pct:12.7},
-      {name:'프랑스',cnt:20,pct:4.0},
-      {name:'미국',cnt:13,pct:2.6},
-      {name:'중국',cnt:7,pct:1.4},
-      {name:'호주',cnt:6,pct:1.2},
-      {name:'네덜란드',cnt:4,pct:0.8},
-      {name:'영국',cnt:2,pct:0.4},
-      {name:'스코틀랜드',cnt:3,pct:0.6},
-      {name:'기타/미기입',cnt:95,pct:19.1},
-    ],
-    types_all: [
-      {name:'가족',cnt:159,pct:31.9,top:'네이버검색(68), 재방문(58), 구글검색(18+)'},
-      {name:'커플',cnt:139,pct:27.9,top:'네이버검색(57), 워크인(51), 인스타타인(15+)'},
-      {name:'친구',cnt:107,pct:21.5,top:'워크인(41), 네이버검색(35), 재방문(11+)'},
-      {name:'1인',cnt:68,pct:13.7,top:'재방문(22), 워크인(15), 네이버검색(14)'},
-    ],
-    types_dom: [
-      {name:'가족',cnt:92,pct:34.6,top:'네이버검색(34+), 재방문(25+), 네이버지도(9+)'},
-      {name:'커플',cnt:84,pct:31.6,top:'네이버검색(26+), 네이버지도(11+), 재방문(11+)'},
-      {name:'친구',cnt:59,pct:22.2,top:'네이버검색(17+), 재방문(8+), 워크인(7+)'},
-      {name:'1인',cnt:31,pct:11.7,top:'재방문(12+), 네이버검색(8+), 네이버지도(3+)'},
-    ],
-    types_for: [
-      {name:'가족',cnt:66,pct:33.2,top:'구글검색(16+), 워크인(14+), 재방문(6+)'},
-      {name:'커플',cnt:52,pct:26.1,top:'워크인(17+), 구글검색(8+), 구글지도(6+)'},
-      {name:'친구',cnt:42,pct:21.1,top:'워크인(17+), 틱톡(8+), 구글검색(3+)'},
-      {name:'1인',cnt:37,pct:18.6,top:'워크인(10+), 구글지도(7+), 네이버검색(2+)'},
-    ],
-    insights: [
-      '네이버 검색(22.0%) + 네이버지도(8.8%) 합산 <strong>30.8%</strong>',
-      '워크인(18.5%) + 재방문(16.4%) 합산 <strong>34.9%</strong>',
-      '인스타(타인) 30건 — 전월 14건 대비 <strong>+114%</strong> 급증',
-      '틱톡 19건 — 전월 10건 대비 <strong>+90%</strong> 성장 지속',
-      '외국인 1위 채널 워크인(33.1%) — 오프라인 노출 효과 지속',
-    ],
-  },
-  5: {
-    label: '5월', period: '2026.05.01 – 2026.05.31',
-    total: 565, ch_total: 581,
-    domestic: 326, foreign: 230, mixed: 9,
-    top1_ch: '워크인', top1_pct: 18.4,
-    has_time: true,
-    ch_all: [
-      {name:'워크인',cnt:107,pct:18.4,color:'#185FA5'},
-      {name:'네이버 검색',cnt:96,pct:16.5,color:'#185FA5'},
-      {name:'재방문',cnt:78,pct:13.4,color:'#185FA5'},
-      {name:'네이버지도',cnt:54,pct:9.3,color:'#185FA5'},
-      {name:'인스타(타인)',cnt:45,pct:7.7,color:'#993556'},
-      {name:'틱톡',cnt:37,pct:6.4,color:'#0F6E56'},
-      {name:'구글 검색',cnt:35,pct:6.0,color:'#888780'},
-      {name:'기타',cnt:55,pct:9.5,color:'#888780'},
-      {name:'인스타(공식)',cnt:23,pct:4.0,color:'#993556'},
-      {name:'지인 추천',cnt:20,pct:3.4,color:'#888780'},
-      {name:'구글 지도',cnt:15,pct:2.6,color:'#888780'},
-      {name:'온라인예매처',cnt:7,pct:1.2,color:'#888780'},
-      {name:'명동점 경유',cnt:2,pct:0.3,color:'#888780'},
-      {name:'블로그',cnt:1,pct:0.2,color:'#888780'},
-    ],
-    ch_dom: [
-      {name:'네이버 검색',cnt:82,pct:24.5,color:'#185FA5'},
-      {name:'재방문',cnt:70,pct:20.9,color:'#185FA5'},
-      {name:'워크인',cnt:45,pct:13.4,color:'#185FA5'},
-      {name:'네이버지도',cnt:42,pct:12.5,color:'#185FA5'},
-      {name:'인스타(타인)',cnt:29,pct:8.7,color:'#993556'},
-      {name:'기타',cnt:31,pct:9.3,color:'#888780'},
-      {name:'인스타(공식)',cnt:12,pct:3.6,color:'#993556'},
-      {name:'지인 추천',cnt:11,pct:3.3,color:'#888780'},
-      {name:'구글 검색',cnt:4,pct:1.2,color:'#888780'},
-      {name:'틱톡',cnt:4,pct:1.2,color:'#0F6E56'},
-    ],
-    ch_for: [
-      {name:'워크인',cnt:59,pct:24.8,color:'#185FA5'},
-      {name:'틱톡',cnt:33,pct:13.9,color:'#0F6E56'},
-      {name:'구글 검색',cnt:30,pct:12.6,color:'#888780'},
-      {name:'기타',cnt:23,pct:9.7,color:'#888780'},
-      {name:'인스타(타인)',cnt:16,pct:6.7,color:'#993556'},
-      {name:'구글 지도',cnt:13,pct:5.5,color:'#888780'},
-      {name:'네이버지도',cnt:12,pct:5.0,color:'#185FA5'},
-      {name:'인스타(공식)',cnt:11,pct:4.6,color:'#993556'},
-      {name:'네이버 검색',cnt:11,pct:4.6,color:'#185FA5'},
-      {name:'지인 추천',cnt:9,pct:3.8,color:'#888780'},
-      {name:'재방문',cnt:8,pct:3.4,color:'#185FA5'},
-      {name:'온라인예매처',cnt:5,pct:2.1,color:'#888780'},
-      {name:'명동점 경유',cnt:2,pct:0.8,color:'#888780'},
-    ],
-    nat: [
-      {name:'한국',cnt:324,pct:57.3},
-      {name:'서양(통합)',cnt:46,pct:8.1},
-      {name:'아메리카',cnt:29,pct:5.1},
-      {name:'미응답',cnt:29,pct:5.1},
-      {name:'중국',cnt:21,pct:3.7},
-      {name:'기타 외국',cnt:21,pct:3.7},
-      {name:'미국',cnt:12,pct:2.1},
-      {name:'프랑스',cnt:10,pct:1.8},
-      {name:'혼합 방문',cnt:9,pct:1.6},
-      {name:'기타',cnt:64,pct:11.3},
-    ],
-    types_all: [
-      {name:'커플',cnt:217,pct:38.4,top:'워크인(44), 네이버검색(40), 네이버지도(28)'},
-      {name:'친구',cnt:152,pct:26.9,top:'워크인(33), 네이버검색(23), 기타(19)'},
-      {name:'가족',cnt:122,pct:21.6,top:'재방문(32), 네이버검색(28), 워크인(17)'},
-      {name:'1인',cnt:68,pct:12.0,top:'워크인(12), 재방문(8), 기타(8)'},
-    ],
-    types_dom: [
-      {name:'커플',cnt:142,pct:43.6,top:'네이버검색(32), 워크인(24), 네이버지도(24)'},
-      {name:'가족',cnt:82,pct:25.2,top:'재방문(31), 네이버검색(27), 네이버지도(7)'},
-      {name:'친구',cnt:75,pct:23.0,top:'네이버검색(19), 워크인(14), 재방문(12)'},
-      {name:'1인',cnt:27,pct:8.3,top:'재방문(7), 네이버지도(5), 워크인(4)'},
-    ],
-    types_for: [
-      {name:'친구',cnt:74,pct:32.2,top:'워크인(17), 구글검색(11), 틱톡(11)'},
-      {name:'커플',cnt:70,pct:30.4,top:'워크인(19), 틱톡(12), 구글검색(6)'},
-      {name:'1인',cnt:41,pct:17.8,top:'워크인(8), 틱톡(6), 기타(5)'},
-      {name:'가족',cnt:40,pct:17.4,top:'워크인(14), 구글검색(7), 인스타(타인)(6)'},
-    ],
-    time: [
-      {h:'12시',dom:19,for:17,tot:36,pct:12.7},
-      {h:'13시',dom:27,for:21,tot:48,pct:17.0},
-      {h:'14시',dom:26,for:14,tot:40,pct:14.1},
-      {h:'15시',dom:34,for:16,tot:50,pct:17.7,peak:true},
-      {h:'16시',dom:20,for:8,tot:28,pct:9.9},
-      {h:'17시',dom:13,for:12,tot:25,pct:8.8},
-      {h:'18시',dom:14,for:14,tot:28,pct:9.9},
-      {h:'19시',dom:11,for:9,tot:20,pct:7.1},
-      {h:'20시',dom:5,for:3,tot:8,pct:2.8},
-    ],
-    insights: [
-      '<strong>워크인(18.4%)</strong>이 처음으로 1위 — 네이버 검색(16.5%)을 역전',
-      '네이버 검색+지도 합산 <strong>25.8%</strong> | 워크인+재방문 합산 <strong>31.8%</strong>',
-      '인스타(타인) 7.7% vs 인스타(공식) 4.0% — 바이럴이 공식의 2배',
-      '틱톡 국외 기준 <strong>2위(13.9%)</strong> — 외국인 핵심 채널로 자리잡음',
-      '13~15시 3시간이 전체 방문의 <strong>48.8%</strong> 집중 (시간 데이터 5월부터)',
-    ],
-  }
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRixukIJsxMyHEGP6ilnKktBXmmMYfU0NUokXCOprjaFT452pMoJ7YpUTZQKbVOZgLlociJ2TJGkR62/pub?gid=1811913983&single=true&output=csv';
+const MONTHS_KR = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+const CH_COLORS = {
+  '네이버 검색':'#185FA5','네이버 지도':'#185FA5','재방문':'#185FA5','워크인':'#185FA5',
+  '인스타(타인)':'#993556','인스타(공식)':'#993556','틱톡':'#0F6E56','샤오홍슈':'#0F6E56',
+  '구글 검색':'#888780','구글 지도':'#888780','지인 추천':'#888780','온라인 예매':'#888780','기타':'#C4C2BA'
 };
+const TIME_HOURS = ['12시','13시','14시','15시','16시','17시','18시','19시','20시'];
 
-const MONTHS = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+let RAW = [];
+let MONTHLY = {};
 let currentMonth = null;
 let currentChTab = {annual:'all', monthly:'all'};
 let currentTypeTab = {annual:'all', monthly:'all'};
 let chartInstances = {};
 
-function destroyChart(id) {
-  if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const header = lines[0].split(',');
+  return lines.slice(1).map(line => {
+    const cols = line.split(',');
+    const obj = {};
+    header.forEach((h,i) => obj[h.trim()] = (cols[i]||'').trim());
+    return obj;
+  }).filter(r => r['날짜'] && r['채널']);
 }
 
-function getAnnualData() {
-  const months = Object.keys(DATA).map(Number);
-  const total = months.reduce((s,m) => s + DATA[m].total, 0);
-  const ch_total = months.reduce((s,m) => s + DATA[m].ch_total, 0);
-  const domestic = months.reduce((s,m) => s + DATA[m].domestic, 0);
-  const foreign = months.reduce((s,m) => s + DATA[m].foreign, 0);
-
-  const allCh = {};
-  months.forEach(m => {
-    DATA[m].ch_all.forEach(c => {
-      if (!allCh[c.name]) allCh[c.name] = {name:c.name, cnt:0, color:c.color};
-      allCh[c.name].cnt += c.cnt;
-    });
+function buildMonthly(rows) {
+  const m = {};
+  rows.forEach(r => {
+    const date = r['날짜'];
+    if (!date || !date.match(/\d{4}-\d{2}-\d{2}/)) return;
+    const month = parseInt(date.split('-')[1]);
+    const year = parseInt(date.split('-')[0]);
+    const key = `${year}-${month}`;
+    if (!m[key]) m[key] = {year, month, rows:[]};
+    m[key].rows.push(r);
   });
-  const chSorted = Object.values(allCh).sort((a,b)=>b.cnt-a.cnt).map(c=>({...c,pct:+(c.cnt/ch_total*100).toFixed(1)}));
-
-  const domCh = {};
-  months.forEach(m => {
-    DATA[m].ch_dom.forEach(c => {
-      if (!domCh[c.name]) domCh[c.name] = {name:c.name, cnt:0, color:c.color};
-      domCh[c.name].cnt += c.cnt;
-    });
-  });
-  const domChTotal = Object.values(domCh).reduce((s,c)=>s+c.cnt,0);
-  const domChSorted = Object.values(domCh).sort((a,b)=>b.cnt-a.cnt).map(c=>({...c,pct:+(c.cnt/domChTotal*100).toFixed(1)}));
-
-  const forCh = {};
-  months.forEach(m => {
-    DATA[m].ch_for.forEach(c => {
-      if (!forCh[c.name]) forCh[c.name] = {name:c.name, cnt:0, color:c.color};
-      forCh[c.name].cnt += c.cnt;
-    });
-  });
-  const forChTotal = Object.values(forCh).reduce((s,c)=>s+c.cnt,0);
-  const forChSorted = Object.values(forCh).sort((a,b)=>b.cnt-a.cnt).map(c=>({...c,pct:+(c.cnt/forChTotal*100).toFixed(1)}));
-
-  const natMerged = {};
-  months.forEach(m => {
-    DATA[m].nat.forEach(n => {
-      if (!natMerged[n.name]) natMerged[n.name] = {name:n.name, cnt:0};
-      natMerged[n.name].cnt += n.cnt;
-    });
-  });
-  const natSorted = Object.values(natMerged).sort((a,b)=>b.cnt-a.cnt).map(n=>({...n,pct:+(n.cnt/total*100).toFixed(1)}));
-
-  const top1 = chSorted[0];
-  return {total,ch_total,domestic,foreign,top1_ch:top1.name,top1_pct:top1.pct,
-    ch_all:chSorted,ch_dom:domChSorted,ch_for:forChSorted,nat:natSorted};
+  return m;
 }
 
-function renderBars(containerId, data, tab) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  const list = tab==='dom' ? data.ch_dom : tab==='for' ? data.ch_for : data.ch_all;
-  const top = list.slice(0,10);
-  const maxPct = Math.max(...top.map(d=>d.pct));
-  container.innerHTML = top.map((d,i) => `
+function calcStats(rows) {
+  const total = rows.length;
+  const domestic = rows.filter(r=>r['구분']==='국내').length;
+  const foreign = rows.filter(r=>r['구분']==='국외').length;
+
+  const chAll = {}, chDom = {}, chFor = {};
+  rows.forEach(r => {
+    const ch = r['채널']; const g = r['구분'];
+    chAll[ch] = (chAll[ch]||0)+1;
+    if(g==='국내') chDom[ch]=(chDom[ch]||0)+1;
+    if(g==='국외') chFor[ch]=(chFor[ch]||0)+1;
+  });
+
+  const toArr = (obj,tot) => Object.entries(obj).map(([name,cnt])=>({name,cnt,pct:+(cnt/tot*100).toFixed(1),color:CH_COLORS[name]||'#C4C2BA'})).sort((a,b)=>b.cnt-a.cnt);
+  const domTotal = Object.values(chDom).reduce((s,v)=>s+v,0)||1;
+  const forTotal = Object.values(chFor).reduce((s,v)=>s+v,0)||1;
+
+  const nat = {};
+  rows.forEach(r=>{ const n=r['국가/지역']||'미응답'; nat[n]=(nat[n]||0)+1; });
+  const natArr = Object.entries(nat).map(([name,cnt])=>({name,cnt,pct:+(cnt/total*100).toFixed(1)})).sort((a,b)=>b.cnt-a.cnt);
+
+  const types = {all:{커플:0,가족:0,친구:0,'1인':0}, dom:{커플:0,가족:0,친구:0,'1인':0}, for:{커플:0,가족:0,친구:0,'1인':0}};
+  const typeCh = {all:{}, dom:{}, for:{}};
+  rows.forEach(r => {
+    const t = r['그룹유형']; const g = r['구분']; const ch = r['채널'];
+    if(!['커플','가족','친구','1인'].includes(t)) return;
+    types.all[t]=(types.all[t]||0)+1;
+    if(!typeCh.all[t]) typeCh.all[t]={};
+    typeCh.all[t][ch]=(typeCh.all[t][ch]||0)+1;
+    if(g==='국내'){
+      types.dom[t]=(types.dom[t]||0)+1;
+      if(!typeCh.dom[t]) typeCh.dom[t]={};
+      typeCh.dom[t][ch]=(typeCh.dom[t][ch]||0)+1;
+    }
+    if(g==='국외'){
+      types.for[t]=(types.for[t]||0)+1;
+      if(!typeCh.for[t]) typeCh.for[t]={};
+      typeCh.for[t][ch]=(typeCh.for[t][ch]||0)+1;
+    }
+  });
+
+  const mkTypeArr = (tObj, tcObj, tot) => Object.entries(tObj).map(([name,cnt])=>{
+    const top3 = Object.entries(tcObj[name]||{}).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([c,n])=>`${c}(${n})`).join(', ');
+    return {name,cnt,pct:+(cnt/tot*100).toFixed(1),top3};
+  }).sort((a,b)=>b.cnt-a.cnt).filter(t=>t.cnt>0);
+
+  const typeTotal = Object.values(types.all).reduce((s,v)=>s+v,0)||1;
+  const domTypeTotal = Object.values(types.dom).reduce((s,v)=>s+v,0)||1;
+  const forTypeTotal = Object.values(types.for).reduce((s,v)=>s+v,0)||1;
+
+  // 시간대
+  const timeData = {};
+  rows.forEach(r=>{
+    const t = r['시간'];
+    if(!t || !t.match(/\d{2}:\d{2}/)) return;
+    const h = parseInt(t.split(':')[0]);
+    if(h<12||h>20) return;
+    const key = h+'시';
+    if(!timeData[key]) timeData[key]={tot:0,dom:0,for:0};
+    timeData[key].tot++;
+    if(r['구분']==='국내') timeData[key].dom++;
+    if(r['구분']==='국외') timeData[key].for++;
+  });
+  const hasTime = Object.keys(timeData).length > 0;
+  const timeArr = TIME_HOURS.map(h=>({h, ...(timeData[h]||{tot:0,dom:0,for:0})}));
+
+  const top1 = toArr(chAll, total)[0] || {name:'-',pct:0};
+
+  return {
+    total, domestic, foreign,
+    top1_ch: top1.name, top1_pct: top1.pct,
+    ch_all: toArr(chAll, total),
+    ch_dom: toArr(chDom, domTotal),
+    ch_for: toArr(chFor, forTotal),
+    nat: natArr,
+    types_all: mkTypeArr(types.all, typeCh.all, typeTotal),
+    types_dom: mkTypeArr(types.dom, typeCh.dom, domTypeTotal),
+    types_for: mkTypeArr(types.for, typeCh.for, forTypeTotal),
+    hasTime, timeArr
+  };
+}
+
+async function loadData() {
+  document.getElementById('page-annual').innerHTML = '<div class="loading"><div class="spinner"></div>최신 데이터 불러오는 중...</div>';
+  try {
+    const res = await fetch(SHEET_CSV_URL + '&t=' + Date.now());
+    const text = await res.text();
+    RAW = parseCSV(text);
+    MONTHLY = buildMonthly(RAW);
+    document.getElementById('last-updated').textContent = '업데이트: ' + new Date().toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    buildSidebar();
+    if (currentMonth) showPage('monthly', currentMonth);
+    else renderAnnualPage();
+  } catch(e) {
+    document.getElementById('page-annual').innerHTML = '<div class="loading">데이터를 불러올 수 없습니다. 잠시 후 새로고침해 주세요.</div>';
+  }
+}
+
+function buildSidebar() {
+  const el = document.getElementById('sidebar-months');
+  el.innerHTML = MONTHS_KR.map((name,i) => {
+    const m = i+1;
+    const key = `2026-${m}`;
+    const has = MONTHLY[key];
+    return `<button class="month-item ${has?'has-data':''} ${currentMonth===m?'active':''}" onclick="${has?`showPage('monthly',${m})`:''}">
+      ${name} ${has?`<span class="month-badge">${MONTHLY[key].rows.length}건</span>`:''}
+    </button>`;
+  }).join('');
+}
+
+function showPage(page, month) {
+  document.getElementById('page-annual').classList.toggle('hidden', page!=='annual');
+  document.getElementById('page-monthly').classList.toggle('hidden', page!=='monthly');
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>t.classList.toggle('active',i===(page==='annual'?0:1)));
+  document.querySelectorAll('.main-item').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.month-item').forEach(t=>t.classList.remove('active'));
+
+  if (page==='annual') {
+    document.getElementById('sidebar-annual').classList.add('active');
+    currentMonth = null;
+    renderAnnualPage();
+  } else {
+    const m = month || Math.max(...Object.keys(MONTHLY).map(k=>parseInt(k.split('-')[1])));
+    currentMonth = m;
+    document.querySelectorAll('.month-item').forEach((el,i)=>{ if(i===m-1) el.classList.add('active'); });
+    renderMonthlyPage(m);
+  }
+  buildSidebar();
+}
+
+function renderBars(id, chArr, tab, stats) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  const list = (tab==='dom'?stats.ch_dom:tab==='for'?stats.ch_for:stats.ch_all).slice(0,10);
+  const max = Math.max(...list.map(d=>d.pct));
+  el.innerHTML = list.map((d,i)=>`
     <div class="bar-row">
       <span class="bar-rank">${i+1}</span>
       <span class="bar-label" title="${d.name}">${d.name}</span>
-      <div class="bar-track"><div class="bar-fill" style="width:${(d.pct/maxPct*100).toFixed(1)}%;background:${d.color}"></div></div>
-      <span class="bar-pct">${d.pct.toFixed(1)}%</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${(d.pct/max*100).toFixed(1)}%;background:${d.color||'#888780'}"></div></div>
+      <span class="bar-pct">${d.pct}%</span>
       <span class="bar-cnt">${d.cnt}건</span>
     </div>`).join('');
 }
 
-function renderNat(containerId, nat, limit=8) {
-  const el = document.getElementById(containerId);
-  if (!el) return;
-  el.innerHTML = nat.slice(0,limit).map(n=>`
-    <div class="nat-row">
-      <span class="nat-name">${n.name}</span>
-      <span class="nat-val">${n.cnt}팀 · ${n.pct.toFixed(1)}%</span>
-    </div>`).join('');
+function renderNat(id, natArr, limit=8) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.innerHTML = natArr.slice(0,limit).map(n=>`
+    <div class="nat-row"><span>${n.name}</span><span class="nat-val">${n.cnt}팀 · ${n.pct}%</span></div>`).join('');
 }
 
-function renderTypes(containerId, data, tab) {
-  const el = document.getElementById(containerId);
-  if (!el) return;
-  const list = tab==='dom' ? data.types_dom : tab==='for' ? data.types_for : data.types_all;
+function renderTypes(id, stats, tab) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  const list = tab==='dom'?stats.types_dom:tab==='for'?stats.types_for:stats.types_all;
   el.innerHTML = list.map(t=>`
     <div class="type-card">
       <div class="type-name">${t.name}</div>
-      <div class="type-pct">${t.cnt}팀 · ${t.pct.toFixed(1)}%</div>
-      <div class="type-top">TOP3: ${t.top}</div>
+      <div class="type-pct">${t.cnt}팀 · ${t.pct}%</div>
+      <div class="type-top">TOP3: ${t.top3||'-'}</div>
     </div>`).join('');
 }
 
-function renderTime(containerId, timeData) {
-  const el = document.getElementById(containerId);
-  if (!el) return;
-  const maxTot = Math.max(...timeData.map(t=>t.tot));
-  el.innerHTML = timeData.map(t => {
-    const dH = Math.round(t.dom/maxTot*85);
-    const fH = Math.round(t.for/maxTot*85);
+function renderTime(id, timeArr) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  const max = Math.max(...timeArr.map(t=>t.tot),1);
+  el.innerHTML = timeArr.map(t=>{
+    const isPeak = t.tot===Math.max(...timeArr.map(x=>x.tot));
+    const dH = Math.round(t.dom/max*85);
+    const fH = Math.round(t.for/max*85);
     return `<div class="time-col">
       <div class="time-bar-wrap">
         <div style="width:10px;height:${dH}px;background:#378ADD;border-radius:2px 2px 0 0"></div>
         <div style="width:10px;height:${fH}px;background:#1D9E75;border-radius:2px 2px 0 0"></div>
       </div>
-      <div class="time-lbl ${t.peak?'time-peak':''}">${t.h.replace('시','')}<br>${t.peak?'★':''}</div>
+      <div class="time-lbl ${isPeak?'time-peak':''}">${t.h.replace('시','')}${isPeak?'<br>★':''}</div>
     </div>`;
   }).join('');
 }
 
-function renderInsights(containerId, insights) {
-  const el = document.getElementById(containerId);
-  if (!el) return;
-  el.innerHTML = insights.map(i=>`
-    <div class="insight-row">
-      <span class="insight-icon">·</span>
-      <span>${i}</span>
-    </div>`).join('');
+function destroyChart(id) {
+  if(chartInstances[id]){chartInstances[id].destroy();delete chartInstances[id];}
 }
 
-function renderTrendChart() {
+function renderTrendChart(monthKeys) {
   destroyChart('trendChart');
-  const months = Object.keys(DATA).map(Number).sort();
-  const labels = months.map(m=>DATA[m].label);
-  const totals = months.map(m=>DATA[m].total);
   const ctx = document.getElementById('trendChart');
-  if (!ctx) return;
-  chartInstances['trendChart'] = new Chart(ctx, {
+  if(!ctx) return;
+  const labels = monthKeys.map(k=>MONTHS_KR[parseInt(k.split('-')[1])-1]);
+  const data = monthKeys.map(k=>MONTHLY[k].rows.length);
+  const colors = monthKeys.map((_,i)=>i===monthKeys.length-1?'#185FA5':i===monthKeys.length-2?'#378ADD':'#B5D4F4');
+  chartInstances['trendChart'] = new Chart(ctx,{
     type:'bar',
-    data:{
-      labels,
-      datasets:[{
-        label:'응답팀 수',
-        data:totals,
-        backgroundColor:['#B5D4F4','#378ADD','#185FA5'],
-        borderRadius:4, borderSkipped:false,
-      }]
-    },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{
-        y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:11}}},
-        x:{grid:{display:false},ticks:{font:{size:12}}}
-      }
-    }
+    data:{labels,datasets:[{label:'방문 건수',data,backgroundColor:colors,borderRadius:4,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:11}}},x:{grid:{display:false},ticks:{font:{size:12}}}}}
   });
 }
 
-function showPage(page, month, btn) {
-  document.getElementById('page-annual').classList.toggle('hidden', page!=='annual');
-  document.getElementById('page-monthly').classList.toggle('hidden', page!=='monthly');
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.main-item').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.month-item').forEach(t=>t.classList.remove('active'));
-
-  if (page==='annual') {
-    document.querySelectorAll('.nav-tab')[0].classList.add('active');
-    document.getElementById('sidebar-annual').classList.add('active');
-    renderAnnualPage();
-  } else {
-    document.querySelectorAll('.nav-tab')[1].classList.add('active');
-    const m = month || Math.max(...Object.keys(DATA).map(Number));
-    currentMonth = m;
-    if (btn) btn.classList.add('active');
-    document.querySelectorAll('.month-item').forEach(el => {
-      if (parseInt(el.dataset.month) === m) el.classList.add('active');
-    });
-    renderMonthlyPage(m);
-  }
-}
-
 function renderAnnualPage() {
-  const annual = getAnnualData();
-  const months = Object.keys(DATA).map(Number).sort();
-  const container = document.getElementById('page-annual');
-  const prevM = months[months.length-2];
-  const lastM = months[months.length-1];
-  const growth = prevM ? (((DATA[lastM].total - DATA[prevM].total)/DATA[prevM].total)*100).toFixed(1) : null;
+  const monthKeys = Object.keys(MONTHLY).sort();
+  if(!monthKeys.length){
+    document.getElementById('page-annual').innerHTML='<div class="loading">데이터가 없습니다.</div>';
+    return;
+  }
+  const allRows = monthKeys.flatMap(k=>MONTHLY[k].rows);
+  const stats = calcStats(allRows);
+  const lastKey = monthKeys[monthKeys.length-1];
+  const prevKey = monthKeys[monthKeys.length-2];
+  const lastM = parseInt(lastKey.split('-')[1]);
+  const growth = prevKey ? (((MONTHLY[lastKey].rows.length - MONTHLY[prevKey].rows.length)/MONTHLY[prevKey].rows.length)*100).toFixed(1) : null;
   const tab = currentChTab.annual;
   const ttab = currentTypeTab.annual;
+  const periods = monthKeys.map(k=>{
+    const rows = MONTHLY[k].rows;
+    const dates = rows.map(r=>r['날짜']).sort();
+    return dates[0]+' – '+dates[dates.length-1];
+  });
 
-  container.innerHTML = `
+  document.getElementById('page-annual').innerHTML = `
     <div class="page-header">
-      <span class="page-badge annual">2026년 누계 (${months.map(m=>DATA[m].label).join(' · ')})</span>
+      <span class="page-badge annual">2026년 누계 (${monthKeys.map(k=>MONTHS_KR[parseInt(k.split('-')[1])-1]).join(' · ')})</span>
       <h1 class="page-title">연간 방문객 유입경로 누계</h1>
-      <p class="page-sub">데이터 보유: ${months.map(m=>DATA[m].period).join(' / ')}</p>
+      <p class="page-sub">데이터 보유 기간: ${periods.join(' / ')} · 총 ${allRows.length.toLocaleString()}건</p>
     </div>
-
     <div class="metrics">
-      <div class="metric-card">
-        <div class="metric-label">총 응답</div>
-        <div class="metric-value">${annual.total.toLocaleString()}팀</div>
-        <div class="metric-note">채널 응답 ${annual.ch_total.toLocaleString()}건</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">국내 방문객</div>
-        <div class="metric-value">${(annual.domestic/annual.total*100).toFixed(1)}%</div>
-        <div class="metric-note">${annual.domestic.toLocaleString()}팀</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">외국인 방문객</div>
-        <div class="metric-value">${(annual.foreign/annual.total*100).toFixed(1)}%</div>
-        <div class="metric-note">${annual.foreign.toLocaleString()}팀</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">누계 1위 채널</div>
-        <div class="metric-value">${annual.top1_ch}</div>
-        <div class="metric-note">${annual.top1_pct}%</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">최근월 증가</div>
-        <div class="metric-value">${DATA[lastM].total}팀</div>
-        <div class="metric-note ${growth>0?'metric-up':'metric-down'}">${growth>0?'▲':'▼'} ${Math.abs(growth)}% 전월 대비</div>
-      </div>
+      <div class="metric-card"><div class="metric-label">총 응답</div><div class="metric-value">${allRows.length.toLocaleString()}건</div><div class="metric-note">누계 합산</div></div>
+      <div class="metric-card"><div class="metric-label">국내 방문객</div><div class="metric-value">${(stats.domestic/stats.total*100).toFixed(1)}%</div><div class="metric-note">${stats.domestic.toLocaleString()}건</div></div>
+      <div class="metric-card"><div class="metric-label">외국인 방문객</div><div class="metric-value">${(stats.foreign/stats.total*100).toFixed(1)}%</div><div class="metric-note">${stats.foreign.toLocaleString()}건</div></div>
+      <div class="metric-card"><div class="metric-label">누계 1위 채널</div><div class="metric-value">${stats.top1_ch}</div><div class="metric-note">${stats.top1_pct}%</div></div>
+      ${growth!==null?`<div class="metric-card"><div class="metric-label">최근월 (${MONTHS_KR[lastM-1]})</div><div class="metric-value">${MONTHLY[lastKey].rows.length}건</div><div class="metric-note class="${growth>0?'metric-up':'metric-down'}">${growth>0?'▲':'▼'} ${Math.abs(growth)}% 전월 대비</div></div>`:''}
     </div>
-
-    <div style="margin-bottom:16px;">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">월별 데이터 현황 — 클릭하면 상세 페이지로</span>
-        </div>
-        <div class="month-calendar">
-          ${MONTHS.map((name,i)=>{
-            const m = i+1;
-            const has = DATA[m];
-            return `<div class="cal-month ${has?'has-data':'no-data'}" onclick="${has?`showPage('monthly',${m})`:''}">
-              <div class="cal-month-name">${name}</div>
-              <div class="cal-count">${has?DATA[m].total+'팀':'—'}</div>
-            </div>`;
-          }).join('')}
-        </div>
+    <div style="margin-bottom:16px"><div class="card">
+      <div class="card-header"><span class="card-title">월별 데이터 현황 — 클릭하면 상세 페이지로</span></div>
+      <div class="month-calendar">
+        ${MONTHS_KR.map((name,i)=>{
+          const m=i+1, key=`2026-${m}`, has=MONTHLY[key];
+          return `<div class="cal-month ${has?'has-data':'no-data'}" onclick="${has?`showPage('monthly',${m})`:''}">
+            <div class="cal-month-name">${name}</div>
+            <div class="cal-count">${has?MONTHLY[key].rows.length+'건':'—'}</div>
+          </div>`;
+        }).join('')}
       </div>
-    </div>
-
+    </div></div>
     <div class="grid grid-2">
       <div class="card">
-        <div class="card-header">
-          <span class="card-title">유입 채널 누계</span>
+        <div class="card-header"><span class="card-title">유입 채널 누계</span>
           <div class="tab-group">
             <button class="tab-btn ${tab==='all'?'active':''}" onclick="setChTab('annual','all')">전체</button>
             <button class="tab-btn ${tab==='dom'?'active':''}" onclick="setChTab('annual','dom')">국내</button>
@@ -826,22 +441,16 @@ function renderAnnualPage() {
         </div>
         <div class="bar-list" id="annual-bars"></div>
       </div>
-
       <div class="card">
         <div class="card-header"><span class="card-title">월별 방문 추이</span></div>
-        <div style="position:relative;height:200px;">
-          <canvas id="trendChart" role="img" aria-label="월별 방문객 추이 막대 차트"></canvas>
-        </div>
+        <div style="position:relative;height:200px"><canvas id="trendChart"></canvas></div>
       </div>
-
       <div class="card">
         <div class="card-header"><span class="card-title">국적 구성 누계 상위 10</span></div>
         <div class="nat-list" id="annual-nat"></div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <span class="card-title">방문 유형 누계</span>
+        <div class="card-header"><span class="card-title">방문 유형 누계</span>
           <div class="tab-group">
             <button class="tab-btn ${ttab==='all'?'active':''}" onclick="setTypeTab('annual','all')">전체</button>
             <button class="tab-btn ${ttab==='dom'?'active':''}" onclick="setTypeTab('annual','dom')">국내</button>
@@ -850,106 +459,51 @@ function renderAnnualPage() {
         </div>
         <div class="type-grid" id="annual-types"></div>
       </div>
-    </div>
+    </div>`;
 
-    <div style="margin-bottom:16px;">
-      <div class="card">
-        <div class="card-header"><span class="card-title">CSV 데이터 업로드 — 새 월 추가</span></div>
-        <div class="upload-zone" id="dropzone"
-          ondragover="event.preventDefault();this.classList.add('dragover')"
-          ondragleave="this.classList.remove('dragover')"
-          ondrop="handleDrop(event)"
-          onclick="document.getElementById('csvInput').click()">
-          <div class="upload-zone-title">+ CSV 파일을 드래그하거나 클릭해서 업로드</div>
-          <div class="upload-zone-sub">현재 3·4·5월 데이터 보유 · 새 월 CSV 추가 시 자동 반영</div>
-        </div>
-      </div>
-    </div>
-  `;
-
-  renderBars('annual-bars', annual, tab);
-  renderNat('annual-nat', annual.nat, 10);
-  renderAnnualTypes(annual, ttab);
-  setTimeout(renderTrendChart, 50);
-}
-
-function renderAnnualTypes(annual, tab) {
-  const months = Object.keys(DATA).map(Number);
-  const merge = (key) => {
-    const merged = {};
-    months.forEach(m => {
-      (DATA[m][key]||[]).forEach(t=>{
-        if(!merged[t.name]) merged[t.name]={name:t.name,cnt:0,top:t.top};
-        merged[t.name].cnt+=t.cnt;
-      });
-    });
-    const total = Object.values(merged).reduce((s,t)=>s+t.cnt,0);
-    return Object.values(merged).sort((a,b)=>b.cnt-a.cnt).map(t=>({...t,pct:+(t.cnt/total*100).toFixed(1)}));
-  };
-  const fakeData = {
-    types_all: merge('types_all'),
-    types_dom: merge('types_dom'),
-    types_for: merge('types_for'),
-  };
-  renderTypes('annual-types', fakeData, tab);
+  renderBars('annual-bars', null, tab, stats);
+  renderNat('annual-nat', stats.nat, 10);
+  renderTypes('annual-types', stats, ttab);
+  setTimeout(()=>renderTrendChart(monthKeys), 50);
 }
 
 function renderMonthlyPage(m) {
-  const d = DATA[m];
-  const months = Object.keys(DATA).map(Number).sort();
-  const idx = months.indexOf(m);
-  const prevM = months[idx-1];
-  const nextM = months[idx+1];
-  const growth = prevM ? (((d.total-DATA[prevM].total)/DATA[prevM].total)*100).toFixed(1) : null;
+  const key = `2026-${m}`;
+  if(!MONTHLY[key]){document.getElementById('page-monthly').innerHTML='<div class="loading">데이터가 없습니다.</div>';return;}
+  const rows = MONTHLY[key].rows;
+  const stats = calcStats(rows);
+  const monthKeys = Object.keys(MONTHLY).sort();
+  const idx = monthKeys.indexOf(key);
+  const prevKey = monthKeys[idx-1];
+  const nextKey = monthKeys[idx+1];
+  const prevM = prevKey?parseInt(prevKey.split('-')[1]):null;
+  const nextM = nextKey?parseInt(nextKey.split('-')[1]):null;
+  const growth = prevKey?(((rows.length-MONTHLY[prevKey].rows.length)/MONTHLY[prevKey].rows.length)*100).toFixed(1):null;
   const tab = currentChTab.monthly;
   const ttab = currentTypeTab.monthly;
-  const container = document.getElementById('page-monthly');
+  const dates = rows.map(r=>r['날짜']).sort();
 
-  container.innerHTML = `
+  document.getElementById('page-monthly').innerHTML = `
     <div class="page-header">
-      <span class="page-badge monthly">${d.label} 상세</span>
-      <h1 class="page-title">${d.label} 방문객 유입경로</h1>
-      <p class="page-sub">${d.period} · ${d.total}팀 응답 · 채널 응답 ${d.ch_total}건</p>
+      <span class="page-badge monthly">${MONTHS_KR[m-1]} 상세</span>
+      <h1 class="page-title">${MONTHS_KR[m-1]} 방문객 유입경로</h1>
+      <p class="page-sub">${dates[0]} – ${dates[dates.length-1]} · ${rows.length}건</p>
       <div class="month-nav">
-        <button class="month-nav-btn" onclick="showPage('monthly',${prevM})" ${!prevM?'disabled':''}>← ${prevM?DATA[prevM].label:'이전'}</button>
-        <span class="month-nav-current">${d.label}</span>
-        <button class="month-nav-btn" onclick="showPage('monthly',${nextM})" ${!nextM?'disabled':''}>→ ${nextM?DATA[nextM].label:'다음'}</button>
+        <button class="month-nav-btn" onclick="showPage('monthly',${prevM})" ${!prevM?'disabled':''}>← ${prevM?MONTHS_KR[prevM-1]:'이전'}</button>
+        <span class="month-nav-current">${MONTHS_KR[m-1]}</span>
+        <button class="month-nav-btn" onclick="showPage('monthly',${nextM})" ${!nextM?'disabled':''}>→ ${nextM?MONTHS_KR[nextM-1]:'다음'}</button>
       </div>
     </div>
-
     <div class="metrics">
-      <div class="metric-card">
-        <div class="metric-label">총 응답</div>
-        <div class="metric-value">${d.total}팀</div>
-        <div class="metric-note">채널 응답 ${d.ch_total}건</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">국내</div>
-        <div class="metric-value">${(d.domestic/d.total*100).toFixed(1)}%</div>
-        <div class="metric-note">${d.domestic}팀</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">국외</div>
-        <div class="metric-value">${(d.foreign/d.total*100).toFixed(1)}%</div>
-        <div class="metric-note">${d.foreign}팀</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">1위 채널</div>
-        <div class="metric-value">${d.top1_ch}</div>
-        <div class="metric-note">${d.top1_pct}%</div>
-      </div>
-      ${growth!==null?`
-      <div class="metric-card">
-        <div class="metric-label">전월 대비</div>
-        <div class="metric-value">${d.total}</div>
-        <div class="metric-note ${growth>0?'metric-up':'metric-down'}">${growth>0?'▲':'▼'} ${Math.abs(growth)}%</div>
-      </div>`:''}
+      <div class="metric-card"><div class="metric-label">총 응답</div><div class="metric-value">${rows.length}건</div><div class="metric-note">${dates[0].substring(5)} – ${dates[dates.length-1].substring(5)}</div></div>
+      <div class="metric-card"><div class="metric-label">국내</div><div class="metric-value">${(stats.domestic/stats.total*100).toFixed(1)}%</div><div class="metric-note">${stats.domestic}건</div></div>
+      <div class="metric-card"><div class="metric-label">국외</div><div class="metric-value">${(stats.foreign/stats.total*100).toFixed(1)}%</div><div class="metric-note">${stats.foreign}건</div></div>
+      <div class="metric-card"><div class="metric-label">1위 채널</div><div class="metric-value">${stats.top1_ch}</div><div class="metric-note">${stats.top1_pct}%</div></div>
+      ${growth!==null?`<div class="metric-card"><div class="metric-label">전월 대비</div><div class="metric-value">${rows.length}건</div><div class="metric-note ${growth>0?'metric-up':'metric-down'}">${growth>0?'▲':'▼'} ${Math.abs(growth)}%</div></div>`:''}
     </div>
-
     <div class="grid grid-2">
       <div class="card">
-        <div class="card-header">
-          <span class="card-title">유입 채널 분석</span>
+        <div class="card-header"><span class="card-title">유입 채널 분석</span>
           <div class="tab-group">
             <button class="tab-btn ${tab==='all'?'active':''}" onclick="setChTab('monthly','all')">전체</button>
             <button class="tab-btn ${tab==='dom'?'active':''}" onclick="setChTab('monthly','dom')">국내</button>
@@ -958,17 +512,12 @@ function renderMonthlyPage(m) {
         </div>
         <div class="bar-list" id="monthly-bars"></div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <span class="card-title">국적 구성 상위 8</span>
-        </div>
+        <div class="card-header"><span class="card-title">국적 구성 상위 8</span></div>
         <div class="nat-list" id="monthly-nat"></div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <span class="card-title">방문 유형 분석</span>
+        <div class="card-header"><span class="card-title">방문 유형 분석</span>
           <div class="tab-group">
             <button class="tab-btn ${ttab==='all'?'active':''}" onclick="setTypeTab('monthly','all')">전체</button>
             <button class="tab-btn ${ttab==='dom'?'active':''}" onclick="setTypeTab('monthly','dom')">국내</button>
@@ -977,95 +526,46 @@ function renderMonthlyPage(m) {
         </div>
         <div class="type-grid" id="monthly-types"></div>
       </div>
-
-      ${d.has_time ? `
+      ${stats.hasTime?`
       <div class="card">
-        <div class="card-header"><span class="card-title">시간대별 방문 (5/20–31 기준)</span></div>
+        <div class="card-header"><span class="card-title">시간대별 방문</span></div>
         <div class="time-legend">
           <div class="legend-item"><div class="legend-dot" style="background:#378ADD"></div>국내</div>
           <div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div>국외</div>
         </div>
         <div class="time-chart" id="monthly-time"></div>
-      </div>` : `
-      <div class="card" style="display:flex;align-items:center;justify-content:center;min-height:160px;">
-        <p style="color:var(--gray-500);font-size:13px;text-align:center">시간대 데이터는 5월부터 수집 시작<br><span style="font-size:11px">5월 이후 월에 자동 표시됩니다</span></p>
+      </div>`:`
+      <div class="card" style="display:flex;align-items:center;justify-content:center;min-height:160px">
+        <p style="color:var(--gray-500);font-size:13px;text-align:center">이 달은 시간 데이터가 없어요<br><span style="font-size:11px">시간 기록이 있는 달에 자동으로 표시됩니다</span></p>
       </div>`}
+    </div>`;
 
-      <div class="card span-2">
-        <div class="card-header"><span class="card-title">주요 시사점</span></div>
-        <div class="insight-list" id="monthly-insights"></div>
-      </div>
-    </div>
-  `;
-
-  renderBars('monthly-bars', d, tab);
-  renderNat('monthly-nat', d.nat, 8);
-  renderTypes('monthly-types', d, ttab);
-  if (d.has_time) renderTime('monthly-time', d.time);
-  renderInsights('monthly-insights', d.insights);
+  renderBars('monthly-bars', null, tab, stats);
+  renderNat('monthly-nat', stats.nat, 8);
+  renderTypes('monthly-types', stats, ttab);
+  if(stats.hasTime) renderTime('monthly-time', stats.timeArr);
 }
 
 function setChTab(page, tab) {
   currentChTab[page] = tab;
-  if (page==='annual') {
-    const annual = getAnnualData();
-    renderBars('annual-bars', annual, tab);
-    document.querySelectorAll('#page-annual .tab-btn').forEach(b=>{
-      if(b.textContent==='전체') b.classList.toggle('active',tab==='all');
-      if(b.textContent==='국내') b.classList.toggle('active',tab==='dom');
-      if(b.textContent==='국외') b.classList.toggle('active',tab==='for');
-    });
+  if(page==='annual'){
+    const stats = calcStats(Object.keys(MONTHLY).flatMap(k=>MONTHLY[k].rows));
+    renderBars('annual-bars', null, tab, stats);
   } else {
-    renderBars('monthly-bars', DATA[currentMonth], tab);
-    const btns = document.querySelectorAll('#page-monthly .card:first-child .tab-btn');
-    btns.forEach(b=>{
-      if(b.textContent==='전체') b.classList.toggle('active',tab==='all');
-      if(b.textContent==='국내') b.classList.toggle('active',tab==='dom');
-      if(b.textContent==='국외') b.classList.toggle('active',tab==='for');
-    });
+    renderBars('monthly-bars', null, tab, calcStats(MONTHLY[`2026-${currentMonth}`].rows));
   }
 }
-
 function setTypeTab(page, tab) {
   currentTypeTab[page] = tab;
-  if (page==='annual') {
-    const annual = getAnnualData();
-    renderAnnualTypes(annual, tab);
+  if(page==='annual'){
+    const stats = calcStats(Object.keys(MONTHLY).flatMap(k=>MONTHLY[k].rows));
+    renderTypes('annual-types', stats, tab);
   } else {
-    renderTypes('monthly-types', DATA[currentMonth], tab);
+    renderTypes('monthly-types', calcStats(MONTHLY[`2026-${currentMonth}`].rows), tab);
   }
 }
 
-function buildSidebar() {
-  const el = document.getElementById('sidebar-months');
-  el.innerHTML = MONTHS.map((name,i) => {
-    const m = i+1;
-    const has = DATA[m];
-    return `<button class="month-item ${has?'has-data':''}"
-      data-month="${m}"
-      onclick="${has?`showPage('monthly',${m})`:''}">
-      ${name}
-      ${has?`<span class="month-badge">${DATA[m].total}팀</span>`:''}
-    </button>`;
-  }).join('');
-}
-
-function handleDrop(e) {
-  e.preventDefault();
-  document.getElementById('dropzone').classList.remove('dragover');
-  const file = e.dataTransfer.files[0];
-  if (file && file.name.endsWith('.csv')) {
-    alert(`"${file.name}" 업로드 확인!\n\n실제 배포 환경에서 CSV 파싱 후 자동 반영됩니다.\n현재는 데이터가 코드에 하드코딩되어 있어요.`);
-  }
-}
-
-function handleCSV(e) {
-  const file = e.target.files[0];
-  if (file) alert(`"${file.name}" 선택됨!\n\n실제 배포 환경에서 자동 파싱·반영됩니다.`);
-}
-
-buildSidebar();
-renderAnnualPage();
+loadData();
 </script>
 </body>
 </html>
