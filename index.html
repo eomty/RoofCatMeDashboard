@@ -713,10 +713,19 @@ function isMeaningfulMemo(memo) {
   if (!memo || !memo.trim()) return false;
   const m = memo.trim();
   if (SKIP_EXACT.includes(m)) return false;
+
+  // 나라 키워드만 제거 후 남는 내용이 있는지 확인
   let temp = m;
-  NAT_KW.forEach(k => { temp = temp.replace(new RegExp(k,'g'),''); });
-  temp = temp.replace(/[+/,·\s]/g,'').trim();
+  NAT_KW.forEach(k => { temp = temp.replace(new RegExp(k, 'gi'), ''); });
+  // 숫자, 특수문자, 공백 제거
+  temp = temp.replace(/[\d+/,·\s\-_()（）]/g, '').trim();
+
+  // 나라명 제거 후 2글자 이상 남아야 의미있음
   if (temp.length < 2) return false;
+
+  // 단순 혼합/혼합만 있는 경우 제외
+  if (/^혼합$/.test(m)) return false;
+
   return true;
 }
 
@@ -727,7 +736,6 @@ function renderMemoSection(feedId, rows) {
   const filterId = isAnnual ? 'annual-memo-filter' : 'monthly-memo-filter';
   const countId = isAnnual ? 'annual-memo-count' : 'monthly-memo-count';
 
-  // 의미있는 메모만 추출
   const memos = rows.filter(r => isMeaningfulMemo(r['메모'])).map(r => ({
     date: r['날짜'],
     nat: r['국가/지역'],
@@ -740,11 +748,9 @@ function renderMemoSection(feedId, rows) {
 
   if (!memoFilterState[feedId]) memoFilterState[feedId] = 'all';
 
-  // 카테고리별 건수
   const catCounts = {};
   memos.forEach(m => { catCounts[m.cat.key] = (catCounts[m.cat.key]||0)+1; });
 
-  // 필터 버튼
   const filterEl = document.getElementById(filterId);
   const countEl = document.getElementById(countId);
   if (countEl) countEl.textContent = `총 ${memos.length}건`;
@@ -752,22 +758,25 @@ function renderMemoSection(feedId, rows) {
   const activeCats = [{key:'all', label:'전체'}, ...MEMO_CATS, {key:'etc', label:'📝 기타'}]
     .filter(c => c.key==='all' || catCounts[c.key]);
 
+  // memos를 전역에 저장해서 필터 버튼에서 접근
+  window._memoData = window._memoData || {};
+  window._memoData[feedId] = memos;
+
   filterEl.innerHTML = activeCats.map(c => `
     <button class="memo-filter-btn ${memoFilterState[feedId]===c.key?'active':''}"
-      onclick="setMemoFilter('${feedId}','${filterId}','${c.key}',${JSON.stringify(memos).replace(/'/g,"\\'")})"
+      onclick="setMemoFilter('${feedId}','${filterId}','${c.key}')"
     >${c.label} ${c.key!=='all'?`(${catCounts[c.key]||0})`:`(${memos.length})`}</button>
   `).join('');
 
   renderMemoFeed(feedId, memos, memoFilterState[feedId]);
 }
 
-function setMemoFilter(feedId, filterId, key, memos) {
+function setMemoFilter(feedId, filterId, key) {
   memoFilterState[feedId] = key;
   document.querySelectorAll(`#${filterId} .memo-filter-btn`).forEach(b => {
-    b.classList.toggle('active', b.textContent.trim().startsWith(
-      key==='all'?'전체': MEMO_CATS.find(c=>c.key===key)?.label || '📝 기타'
-    ));
+    b.classList.toggle('active', b.getAttribute('onclick').includes(`'${key}'`));
   });
+  const memos = window._memoData[feedId] || [];
   renderMemoFeed(feedId, memos, key);
 }
 
