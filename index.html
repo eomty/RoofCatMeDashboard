@@ -125,6 +125,29 @@
   .modal-close:hover{background:var(--gray-300)}
   .modal-body{overflow-y:auto;padding:16px 22px;flex:1}
   .modal-sub{font-size:11px;color:var(--gray-500);margin-bottom:14px}
+  .memo-filter{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px}
+  .memo-filter-btn{font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--gray-500);cursor:pointer;font-family:inherit;transition:all .15s}
+  .memo-filter-btn:hover{background:var(--gray-100)}
+  .memo-filter-btn.active{background:var(--blue-pale);color:var(--blue-dark);border-color:transparent;font-weight:500}
+  .memo-feed{display:flex;flex-direction:column;gap:8px}
+  .memo-item{background:var(--gray-100);border-radius:var(--radius-md);padding:12px 14px;border-left:3px solid var(--border)}
+  .memo-item.cat-workin{border-left-color:#185FA5}
+  .memo-item.cat-new{border-left-color:#0F6E56}
+  .memo-item.cat-viral{border-left-color:#993556}
+  .memo-item.cat-return{border-left-color:#BA7517}
+  .memo-item.cat-myeongdong{border-left-color:#888780}
+  .memo-item.cat-etc{border-left-color:#d3d1c7}
+  .memo-top{display:flex;align-items:center;gap:6px;margin-bottom:5px;flex-wrap:wrap}
+  .memo-cat-badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500}
+  .memo-cat-badge.cat-workin{background:#E6F1FB;color:#0C447C}
+  .memo-cat-badge.cat-new{background:#EAF3DE;color:#27500A}
+  .memo-cat-badge.cat-viral{background:#FDEEF3;color:#7A1F3D}
+  .memo-cat-badge.cat-return{background:#FAEEDA;color:#7A4A00}
+  .memo-cat-badge.cat-myeongdong{background:#f0efe8;color:#555}
+  .memo-cat-badge.cat-etc{background:#f0efe8;color:#555}
+  .memo-date{font-size:10px;color:var(--gray-500)}
+  .memo-meta{font-size:10px;color:var(--gray-500)}
+  .memo-text{font-size:13px;color:var(--gray-900);line-height:1.5}
 </style>
 </head>
 <body>
@@ -488,12 +511,24 @@ function renderAnnualPage() {
         </div>
         <div class="type-grid" id="annual-types"></div>
       </div>
+      <div class="card span-2">
+        <div class="card-header">
+          <span class="card-title">현장 메모 — 특이사항</span>
+          <span id="annual-memo-count" style="font-size:11px;color:var(--gray-500)"></span>
+        </div>
+        <div class="memo-filter" id="annual-memo-filter"></div>
+        <div class="memo-feed" id="annual-memos"></div>
+      </div>
     </div>`;
 
   renderBars('annual-bars', null, tab, stats);
   renderNat('annual-nat', stats.nat, 10);
   renderTypes('annual-types', stats, ttab);
   setTimeout(()=>renderTrendChart(monthKeys), 50);
+
+  // 메모 섹션
+  const allRows2 = monthKeys.flatMap(k=>MONTHLY[k].rows);
+  renderMemoSection('annual-memos', allRows2);
 }
 
 function renderMonthlyPage(m) {
@@ -573,12 +608,21 @@ function renderMonthlyPage(m) {
       <div class="card" style="display:flex;align-items:center;justify-content:center;min-height:160px">
         <p style="color:var(--gray-500);font-size:13px;text-align:center">이 달은 시간 데이터가 없어요<br><span style="font-size:11px">시간 기록이 있는 달에 자동으로 표시됩니다</span></p>
       </div>`}
+      <div class="card span-2">
+        <div class="card-header">
+          <span class="card-title">현장 메모 — 특이사항</span>
+          <span id="monthly-memo-count" style="font-size:11px;color:var(--gray-500)"></span>
+        </div>
+        <div class="memo-filter" id="monthly-memo-filter"></div>
+        <div class="memo-feed" id="monthly-memos"></div>
+      </div>
     </div>`;
 
   renderBars('monthly-bars', null, tab, stats);
   renderNat('monthly-nat', stats.nat, 8);
   renderTypes('monthly-types', stats, ttab);
   if(stats.hasTime) renderTime('monthly-time', stats.timeArr);
+  renderMemoSection('monthly-memos', rows);
 }
 
 function setChTab(page, tab) {
@@ -640,6 +684,111 @@ function closeModal(e) {
   document.getElementById('modal-overlay').classList.add('hidden');
 }
 document.addEventListener('keydown', e => { if(e.key==='Escape') document.getElementById('modal-overlay').classList.add('hidden'); });
+
+// ===== 메모 분류 =====
+const NAT_KW = ['한국','미국','프랑스','독일','영국','일본','중국','호주','캐나다','싱가포르','홍콩','타이완','필리핀','베트남','태국','인도네시아','말레이시아','러시아','이탈리아','폴란드','스페인','오스트리아','체코','덴마크','노르웨이','스웨덴','핀란드','그리스','포르투갈','터키','사우디아라비아','뉴질랜드','인도','시드니','런던','파리','베를린','도쿄','상하이','캘리포니아','동아시아','싱가폴','이란'];
+const SKIP_EXACT = ['카카오맵','주렁주렁','네이버 예약','인터넷','internet'];
+
+const MEMO_CATS = [
+  {key:'workin', label:'🏪 워크인 상세', color:'cat-workin',
+   test: m => /빈티지|간판|지나가다|걷다가|등신대|내려옴|근무지|위에 있다가/.test(m)},
+  {key:'new', label:'🤖 신규 채널', color:'cat-new',
+   test: m => /챗지피티|chat gpt|chatgpt|유튜브|트래볼루션|투어 어플|홍콩 투어|AI|인공지능/i.test(m)},
+  {key:'viral', label:'💬 바이럴·특이', color:'cat-viral',
+   test: m => /바이럴|베스트로|외국인 사이|홍대에오면|인스타.*틱톡|틱톡.*인스타|검색해봄|cat cafe|한분은|복합/.test(m)},
+  {key:'return', label:'🔄 재방문 스토리', color:'cat-return',
+   test: m => /년 전|년전|재방문|25년도|전에 방문/.test(m)},
+  {key:'myeongdong', label:'🏢 명동점 연계', color:'cat-myeongdong',
+   test: m => /명동|명동점/.test(m)},
+];
+
+function classifyMemo(memo) {
+  for (const cat of MEMO_CATS) {
+    if (cat.test(memo)) return cat;
+  }
+  return {key:'etc', label:'📝 기타', color:'cat-etc'};
+}
+
+function isMeaningfulMemo(memo) {
+  if (!memo || !memo.trim()) return false;
+  const m = memo.trim();
+  if (SKIP_EXACT.includes(m)) return false;
+  let temp = m;
+  NAT_KW.forEach(k => { temp = temp.replace(new RegExp(k,'g'),''); });
+  temp = temp.replace(/[+/,·\s]/g,'').trim();
+  if (temp.length < 2) return false;
+  return true;
+}
+
+let memoFilterState = {};
+
+function renderMemoSection(feedId, rows) {
+  const isAnnual = feedId === 'annual-memos';
+  const filterId = isAnnual ? 'annual-memo-filter' : 'monthly-memo-filter';
+  const countId = isAnnual ? 'annual-memo-count' : 'monthly-memo-count';
+
+  // 의미있는 메모만 추출
+  const memos = rows.filter(r => isMeaningfulMemo(r['메모'])).map(r => ({
+    date: r['날짜'],
+    nat: r['국가/지역'],
+    gubn: r['구분'],
+    ch: r['채널'],
+    type: r['그룹유형'],
+    memo: r['메모'].trim(),
+    cat: classifyMemo(r['메모'].trim())
+  })).sort((a,b) => b.date.localeCompare(a.date));
+
+  if (!memoFilterState[feedId]) memoFilterState[feedId] = 'all';
+
+  // 카테고리별 건수
+  const catCounts = {};
+  memos.forEach(m => { catCounts[m.cat.key] = (catCounts[m.cat.key]||0)+1; });
+
+  // 필터 버튼
+  const filterEl = document.getElementById(filterId);
+  const countEl = document.getElementById(countId);
+  if (countEl) countEl.textContent = `총 ${memos.length}건`;
+
+  const activeCats = [{key:'all', label:'전체'}, ...MEMO_CATS, {key:'etc', label:'📝 기타'}]
+    .filter(c => c.key==='all' || catCounts[c.key]);
+
+  filterEl.innerHTML = activeCats.map(c => `
+    <button class="memo-filter-btn ${memoFilterState[feedId]===c.key?'active':''}"
+      onclick="setMemoFilter('${feedId}','${filterId}','${c.key}',${JSON.stringify(memos).replace(/'/g,"\\'")})"
+    >${c.label} ${c.key!=='all'?`(${catCounts[c.key]||0})`:`(${memos.length})`}</button>
+  `).join('');
+
+  renderMemoFeed(feedId, memos, memoFilterState[feedId]);
+}
+
+function setMemoFilter(feedId, filterId, key, memos) {
+  memoFilterState[feedId] = key;
+  document.querySelectorAll(`#${filterId} .memo-filter-btn`).forEach(b => {
+    b.classList.toggle('active', b.textContent.trim().startsWith(
+      key==='all'?'전체': MEMO_CATS.find(c=>c.key===key)?.label || '📝 기타'
+    ));
+  });
+  renderMemoFeed(feedId, memos, key);
+}
+
+function renderMemoFeed(feedId, memos, filter) {
+  const el = document.getElementById(feedId);
+  if (!el) return;
+  const filtered = filter==='all' ? memos : memos.filter(m=>m.cat.key===filter);
+  if (!filtered.length) {
+    el.innerHTML = '<p style="color:var(--gray-500);font-size:13px;padding:12px 0">해당 카테고리 메모가 없어요.</p>';
+    return;
+  }
+  el.innerHTML = filtered.map(m => `
+    <div class="memo-item ${m.cat.color}">
+      <div class="memo-top">
+        <span class="memo-cat-badge ${m.cat.color}">${m.cat.label}</span>
+        <span class="memo-date">${m.date}</span>
+        <span class="memo-meta">${m.gubn} · ${m.nat} · ${m.type} · ${m.ch}</span>
+      </div>
+      <div class="memo-text">${m.memo}</div>
+    </div>`).join('');
+}
 
 loadData();
 </script>
