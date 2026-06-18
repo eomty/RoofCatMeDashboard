@@ -232,7 +232,13 @@ function parseCSV(text) {
   return lines.slice(1).map(line => {
     const cols = parseCSVLine(line);
     const obj = {};
-    header.forEach((h,i) => obj[h.trim()] = (cols[i]||'').trim());
+    header.forEach((h,i) => {
+      let key = h.trim();
+      // 헤더 표기 차이 통일 (지점별로 공백 유무, 명칭이 다를 수 있음)
+      if (key === '그룹 유형' || key === '그룹유형' || key === '유형') key = '그룹유형';
+      if (key === '국가지역' || key === '국가/지역' || key === '국가 / 지역') key = '국가/지역';
+      obj[key] = (cols[i]||'').trim();
+    });
     return obj;
   }).filter(r => r['날짜'] && (r['채널'] || r['그룹유형']));
 }
