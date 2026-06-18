@@ -234,9 +234,15 @@ function parseCSV(text) {
     const obj = {};
     header.forEach((h,i) => {
       let key = h.trim();
-      // 헤더 표기 차이 통일 (지점별로 공백 유무, 명칭이 다를 수 있음)
-      if (key === '그룹 유형' || key === '그룹유형' || key === '유형') key = '그룹유형';
-      if (key === '국가지역' || key === '국가/지역' || key === '국가 / 지역') key = '국가/지역';
+      // 모든 공백(일반/줄바꿈/non-breaking 등) 제거 후 비교 — 표기 차이를 흡수
+      const noSpace = key.replace(/[\s\u00A0\uFEFF]+/g, '');
+      if (noSpace === '그룹유형' || noSpace === '유형') key = '그룹유형';
+      else if (noSpace === '국가지역' || noSpace === '국가/지역') key = '국가/지역';
+      else if (noSpace === '날짜') key = '날짜';
+      else if (noSpace === '시간') key = '시간';
+      else if (noSpace === '구분') key = '구분';
+      else if (noSpace === '채널') key = '채널';
+      else if (noSpace === '메모') key = '메모';
       obj[key] = (cols[i]||'').trim();
     });
     return obj;
