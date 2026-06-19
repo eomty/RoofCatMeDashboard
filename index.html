@@ -635,6 +635,7 @@ function renderMonthlyPage(m) {
   if(!MONTHLY[key]){document.getElementById('page-monthly').innerHTML='<div class="loading">데이터가 없습니다.</div>';return;}
   const rows = MONTHLY[key].rows;
   const stats = calcStats(rows);
+  window._monthlyStats = stats;
   const monthKeys = Object.keys(MONTHLY).sort();
   const idx = monthKeys.indexOf(key);
   const prevKey = monthKeys[idx-1];
@@ -668,7 +669,7 @@ function renderMonthlyPage(m) {
       <div class="card">
         <div class="card-header"><span class="card-title">유입 채널 분석</span>
           <div style="display:flex;gap:6px;align-items:center">
-            <button class="more-btn" onclick="openChModal(stats,'${tab}','${MONTHS_KR[m-1]} 유입 채널 전체 순위')">전체보기</button>
+            <button class="more-btn" onclick="openChModal(window._monthlyStats,'${tab}','${MONTHS_KR[m-1]} 유입 채널 전체 순위')">전체보기</button>
             <div class="tab-group">
               <button class="tab-btn ${tab==='all'?'active':''}" onclick="setChTab('monthly','all')">전체</button>
               <button class="tab-btn ${tab==='dom'?'active':''}" onclick="setChTab('monthly','dom')">국내</button>
@@ -681,7 +682,7 @@ function renderMonthlyPage(m) {
       <div class="card">
         <div class="card-header">
           <span class="card-title">국적 구성 상위 8</span>
-          <button class="more-btn" onclick="openNatModal(stats,'${MONTHS_KR[m-1]} 국적 구성 전체 순위')">전체보기</button>
+          <button class="more-btn" onclick="openNatModal(window._monthlyStats,'${MONTHS_KR[m-1]} 국적 구성 전체 순위')">전체보기</button>
         </div>
         <div class="nat-list" id="monthly-nat"></div>
       </div>
