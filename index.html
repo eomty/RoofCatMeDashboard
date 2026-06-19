@@ -829,6 +829,10 @@ function renderCompareBody(hStats, hCount, mStats, mCount, extraTrendHtml) {
     return compareBarRow(name, hv, mv, maxNat);
   }).join('');
 
+  // 모달에서 참조할 수 있도록 비교 stats를 전역에 저장 (return 이전에 실행되어야 함)
+  window._compareHStats = hStats;
+  window._compareMStats = mStats;
+
   return `
     <div class="grid grid-2">
       <div class="card">
@@ -851,7 +855,10 @@ function renderCompareBody(hStats, hCount, mStats, mCount, extraTrendHtml) {
       </div>
 
       <div class="card span-2">
-        <div class="card-header"><span class="card-title">유입 채널 비교 (전체 비율 기준)</span></div>
+        <div class="card-header">
+          <span class="card-title">유입 채널 비교 (전체 비율 기준)</span>
+          <button class="more-btn" onclick="openCompareChModal(window._compareHStats, window._compareMStats, '유입 채널 전체 순위 비교')">전체보기</button>
+        </div>
         ${chCompareRows || '<p style="color:var(--gray-500);font-size:13px">데이터가 없습니다.</p>'}
       </div>
 
@@ -877,7 +884,10 @@ function renderCompareBody(hStats, hCount, mStats, mCount, extraTrendHtml) {
       ${extraTrendHtml}
 
       <div class="card span-2">
-        <div class="card-header"><span class="card-title">국적 구성 비교 (상위 6)</span></div>
+        <div class="card-header">
+          <span class="card-title">국적 구성 비교 (상위 6)</span>
+          <button class="more-btn" onclick="openCompareNatModal(window._compareHStats, window._compareMStats, '국적 구성 전체 순위 비교')">전체보기</button>
+        </div>
         ${natRows || '<p style="color:var(--gray-500);font-size:13px">데이터가 없습니다.</p>'}
       </div>
     </div>`;
@@ -1013,6 +1023,57 @@ function openNatModal(stats, title) {
         <span class="nat-val">${n.cnt}건 · ${n.pct}%</span>
       </div>`).join('')
   }</div>`;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function openCompareChModal(hStats, mStats, title) {
+  const hList = hStats.ch_all;
+  const mList = mStats.ch_all;
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-sub').textContent = `홍대점 ${hList.reduce((s,d)=>s+d.cnt,0)}건 · 명동점 ${mList.reduce((s,d)=>s+d.cnt,0)}건`;
+
+  const renderList = (list, color) => {
+    const max = Math.max(...list.map(d=>d.pct), 1);
+    return list.map((d,i)=>`
+      <div class="bar-row">
+        <span class="bar-rank">${i+1}</span>
+        <span class="bar-label" title="${d.name}" style="width:90px">${d.name}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${(d.pct/max*100).toFixed(1)}%;background:${color}"></div></div>
+        <span class="bar-pct">${d.pct}%</span>
+        <span class="bar-cnt">${d.cnt}건</span>
+      </div>`).join('');
+  };
+
+  document.getElementById('modal-content').innerHTML = `
+    <p style="font-size:11px;color:#185FA5;font-weight:600;margin-bottom:8px">홍대점</p>
+    <div class="bar-list" style="margin-bottom:18px">${renderList(hList, '#185FA5') || '<p style="color:var(--gray-500);font-size:13px">데이터가 없습니다.</p>'}</div>
+    <p style="font-size:11px;color:#993556;font-weight:600;margin-bottom:8px">명동점</p>
+    <div class="bar-list">${renderList(mList, '#993556') || '<p style="color:var(--gray-500);font-size:13px">데이터가 없습니다.</p>'}</div>
+  `;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function openCompareNatModal(hStats, mStats, title) {
+  const hList = hStats.nat;
+  const mList = mStats.nat;
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-sub').textContent = `홍대점 ${hList.reduce((s,n)=>s+n.cnt,0)}건 · 명동점 ${mList.reduce((s,n)=>s+n.cnt,0)}건`;
+
+  const renderList = (list) => list.map((n,i)=>`
+      <div class="nat-row">
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--gray-500);width:20px;text-align:right">${i+1}</span>
+          <span>${n.name}</span>
+        </span>
+        <span class="nat-val">${n.cnt}건 · ${n.pct}%</span>
+      </div>`).join('');
+
+  document.getElementById('modal-content').innerHTML = `
+    <p style="font-size:11px;color:#185FA5;font-weight:600;margin-bottom:8px">홍대점</p>
+    <div class="nat-list" style="margin-bottom:18px">${renderList(hList) || '<p style="color:var(--gray-500);font-size:13px">데이터가 없습니다.</p>'}</div>
+    <p style="font-size:11px;color:#993556;font-weight:600;margin-bottom:8px">명동점</p>
+    <div class="nat-list">${renderList(mList) || '<p style="color:var(--gray-500);font-size:13px">데이터가 없습니다.</p>'}</div>
+  `;
   document.getElementById('modal-overlay').classList.remove('hidden');
 }
 
