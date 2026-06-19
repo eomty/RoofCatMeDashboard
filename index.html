@@ -579,7 +579,7 @@ function renderAnnualPage() {
       <div class="card">
         <div class="card-header"><span class="card-title">유입 채널 누계</span>
           <div style="display:flex;gap:6px;align-items:center">
-            <button class="more-btn" onclick="openChModal(calcStats(Object.keys(MONTHLY).flatMap(k=>MONTHLY[k].rows)),'${tab}','유입 채널 전체 순위 (누계)')">전체보기</button>
+            <button class="more-btn" onclick="openChModal(calcStats(Object.keys(getMonthly()).flatMap(k=>getMonthly()[k].rows)),'${tab}','유입 채널 전체 순위 (누계)')">전체보기</button>
             <div class="tab-group">
             <button class="tab-btn ${tab==='all'?'active':''}" onclick="setChTab('annual','all')">전체</button>
             <button class="tab-btn ${tab==='dom'?'active':''}" onclick="setChTab('annual','dom')">국내</button>
@@ -595,7 +595,7 @@ function renderAnnualPage() {
       <div class="card">
         <div class="card-header">
           <span class="card-title">국적 구성 누계 상위 10</span>
-          <button class="more-btn" onclick="openNatModal(calcStats(Object.keys(MONTHLY).flatMap(k=>MONTHLY[k].rows)),'국적 구성 전체 순위 (누계)')">전체보기</button>
+          <button class="more-btn" onclick="openNatModal(calcStats(Object.keys(getMonthly()).flatMap(k=>getMonthly()[k].rows)),'국적 구성 전체 순위 (누계)')">전체보기</button>
         </div>
         <div class="nat-list" id="annual-nat"></div>
       </div>
