@@ -587,13 +587,19 @@ async function loadBlog() {
   try {
     const res = await fetch(BLOG_CSV_URL + (BLOG_CSV_URL.includes('?') ? '&' : '?') + 't=' + Date.now());
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    BLOG_ALL = toBlogs(parseCSV(await res.text()));
-    if (!BLOG_ALL.length) throw new Error('empty');
+    const rows = parseCSV(await res.text());
+    BLOG_ALL = toBlogs(rows);
+    if (!BLOG_ALL.length) throw new Error('읽은 글이 0건이에요. 시트에서 읽은 첫 줄: [' + (rows[0] || []).join(' | ').slice(0, 120) + '] / 총 ' + rows.length + '줄');
     buildBlogFilters();
     card.classList.remove('hidden');
     applyBlog();
   } catch (e) {
-    card.classList.add('hidden');
+    // 실패해도 숨기지 않고 원인을 보여준다 (다른 리뷰 기능에는 영향 없음)
+    card.classList.remove('hidden');
+    document.getElementById('blog-count').textContent = '';
+    document.getElementById('blog-result').textContent = '';
+    document.getElementById('blog-more').classList.add('hidden');
+    document.getElementById('blog-feed').innerHTML = '<p class="empty-msg">블로그 후기를 불러오지 못했어요. 원인: ' + esc(e && e.message ? e.message : e) + '</p>';
   }
 }
 
