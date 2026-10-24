@@ -99,6 +99,10 @@
   .blog-title:hover{text-decoration:underline}
   .badge.pf-blog{background:#E1F5EE;color:#0F6E56}
   .badge.pf-cafe{background:#FAEEDA;color:#7A4A00}
+  .tabs{display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--border)}
+  .tab{padding:9px 18px;font-size:14px;font-weight:500;color:var(--gray-500);background:transparent;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;font-family:inherit}
+  .tab:hover{color:var(--gray-900)}
+  .tab.active{color:var(--blue-dark);border-bottom-color:var(--blue-dark)}
 </style>
 </head>
 <body>
@@ -120,16 +124,23 @@
     <p class="page-sub" id="page-sub">데이터 불러오는 중...</p>
   </div>
 
-  <div id="loading" class="loading"><div class="spinner"></div>리뷰 불러오는 중...</div>
-
-  <div id="app" class="hidden">
-    <div class="card ai-card" style="margin-bottom:16px">
+  <div class="card ai-card" style="margin-bottom:16px">
       <div class="card-header">
         <span class="card-title">AI 리뷰 요약</span>
         <span class="ai-badge">준비 중</span>
       </div>
       <p class="ai-text">리뷰를 AI가 요약해서 이 자리에 보여줄 예정이에요. 월별 요약, 별점대별 요약(저별점 원인 등)을 붙일 수 있도록 자리를 비워 두었어요.</p>
     </div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-tab="visitor" onclick="switchTab('visitor')">방문자 리뷰</button>
+    <button class="tab" data-tab="blog" id="tab-blog" onclick="switchTab('blog')">블로그 리뷰</button>
+  </div>
+
+  <div id="pane-visitor">
+  <div id="loading" class="loading"><div class="spinner"></div>리뷰 불러오는 중...</div>
+
+  <div id="app" class="hidden">
 
     <div class="card" style="margin-bottom:16px">
       <div class="filter-row" id="row-branch" style="display:none">
@@ -209,10 +220,12 @@
       </div>
     </div>
   </div>
+  </div>
 
-  <div class="card hidden" id="blog-card" style="margin-top:16px">
+  <div id="pane-blog" class="hidden">
+  <div class="card" id="blog-card">
     <div class="card-header">
-      <span class="card-title">네이버 블로그 후기</span>
+      <span class="card-title">블로그 리뷰</span>
       <span id="blog-count" style="font-size:11px;color:var(--gray-500)"></span>
     </div>
     <p class="page-sub" style="margin:-4px 0 12px">별점 없이 글로 남긴 후기예요. 제목을 누르면 원문 블로그로 이동해요.</p>
@@ -235,6 +248,7 @@
     <div class="result-line" id="blog-result" style="margin-bottom:10px"></div>
     <div class="review-feed" id="blog-feed"></div>
     <button class="more-btn hidden" id="blog-more" onclick="blogShowMore()">더 보기</button>
+  </div>
   </div>
 </main>
 
@@ -556,7 +570,7 @@ function renderFeed() {
 
 function showMore() { shown += PAGE_SIZE; renderFeed(); }
 
-// ───── 네이버 블로그 후기 (기존 리뷰 기능과 별개로 동작) ─────
+// ───── 블로그 리뷰 (기존 리뷰 기능과 별개로 동작) ─────
 // 구글 시트 '블로그' 탭을 웹에 게시한 CSV 주소를 아래 따옴표 안에 붙여 넣으세요. 비워 두면 이 카드는 숨겨져요.
 const BLOG_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRixukIJsxMyHEGP6ilnKktBXmmMYfU0NUokXCOprjaFT452pMoJ7YpUTZQKbVOZgLlociJ2TJGkR62/pub?gid=52043169&single=true&output=csv';
 
@@ -583,7 +597,7 @@ function toBlogs(rows) {
 
 async function loadBlog() {
   const card = document.getElementById('blog-card');
-  if (!BLOG_CSV_URL) { card.classList.add('hidden'); return; }
+  if (!BLOG_CSV_URL) { document.getElementById('tab-blog').style.display = 'none'; return; }
   try {
     const res = await fetch(BLOG_CSV_URL + (BLOG_CSV_URL.includes('?') ? '&' : '?') + 't=' + Date.now());
     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -599,7 +613,7 @@ async function loadBlog() {
     document.getElementById('blog-count').textContent = '';
     document.getElementById('blog-result').textContent = '';
     document.getElementById('blog-more').classList.add('hidden');
-    document.getElementById('blog-feed').innerHTML = '<p class="empty-msg">블로그 후기를 불러오지 못했어요. 원인: ' + esc(e && e.message ? e.message : e) + '</p>';
+    document.getElementById('blog-feed').innerHTML = '<p class="empty-msg">블로그 리뷰를 불러오지 못했어요. 원인: ' + esc(e && e.message ? e.message : e) + '</p>';
   }
 }
 
@@ -682,7 +696,7 @@ function renderBlogFeed() {
   const el = document.getElementById('blog-feed');
   const btn = document.getElementById('blog-more');
   if (!BLOG_FILTERED.length) {
-    el.innerHTML = '<p class="empty-msg">조건에 맞는 블로그 후기가 없어요.</p>';
+    el.innerHTML = '<p class="empty-msg">조건에 맞는 블로그 리뷰가 없어요.</p>';
     btn.classList.add('hidden');
     return;
   }
@@ -709,8 +723,19 @@ function renderBlogFeed() {
 
 function blogShowMore() { blogShown += BLOG_PAGE; renderBlogFeed(); }
 
+// ───── 탭 전환 (방문자 리뷰 / 블로그 리뷰) ─────
+function switchTab(name) {
+  if (name === 'blog' && document.getElementById('tab-blog').style.display === 'none') name = 'visitor';
+  document.getElementById('pane-visitor').classList.toggle('hidden', name !== 'visitor');
+  document.getElementById('pane-blog').classList.toggle('hidden', name !== 'blog');
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  try { history.replaceState(null, '', name === 'blog' ? '#blog' : location.pathname + location.search); } catch (e) {}
+  window.dispatchEvent(new Event('resize'));
+}
+
 loadData();
 loadBlog();
+if (location.hash === '#blog') switchTab('blog');
 </script>
 </body>
 </html>
