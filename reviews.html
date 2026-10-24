@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>루프캣미 · 리뷰 대시보드</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --blue-dark:#0C447C;--blue-mid:#185FA5;--blue-light:#378ADD;--blue-pale:#E6F1FB;
+    --green-dark:#27500A;--green-pale:#EAF3DE;
+    --gray-900:#1a1a18;--gray-700:#444441;--gray-500:#888780;--gray-300:#d3d1c7;--gray-100:#f1efe8;
+    --white:#ffffff;--border:rgba(0,0,0,0.08);
+    --radius-sm:6px;--radius-md:10px;--radius-lg:14px;
+    --nav-h:54px;
+  }
+  body{font-family:'Noto Sans KR',sans-serif;background:var(--gray-100);color:var(--gray-900);font-size:14px;min-height:100vh}
+  nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;z-index:100}
+  .nav-logo{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--gray-900);text-decoration:none}
+  .nav-dot{width:8px;height:8px;background:var(--blue-mid);border-radius:50%;flex-shrink:0}
+  .nav-divider{width:1px;height:18px;background:var(--border)}
+  .nav-link{padding:5px 14px;border-radius:var(--radius-sm);font-size:13px;color:var(--gray-500);text-decoration:none;transition:all .15s}
+  .nav-link:hover{background:var(--gray-100);color:var(--gray-900)}
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .last-updated{font-size:11px;color:var(--gray-500)}
+  .refresh-btn{padding:6px 14px;border-radius:var(--radius-sm);background:var(--blue-mid);color:white;border:none;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s}
+  .refresh-btn:hover{background:var(--blue-dark)}
+  .content{max-width:1180px;margin:0 auto;padding:calc(var(--nav-h) + 28px) 28px 40px}
+  .page-header{margin-bottom:20px}
+  .page-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 10px;border-radius:20px;margin-bottom:8px;background:var(--green-pale);color:var(--green-dark)}
+  .page-title{font-size:22px;font-weight:600;margin-bottom:4px}
+  .page-sub{font-size:13px;color:var(--gray-500)}
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+  .metric-card{background:var(--white);border-radius:var(--radius-md);border:1px solid var(--border);padding:16px 18px}
+  .metric-label{font-size:11px;color:var(--gray-500);margin-bottom:4px}
+  .metric-value{font-size:24px;font-weight:600;line-height:1.1;margin-bottom:2px}
+  .metric-note{font-size:11px;color:var(--gray-500)}
+  .metric-up{color:#3B6D11}
+  .metric-down{color:#E24B4A}
+  .grid{display:grid;gap:16px;margin-bottom:16px}
+  .grid-2{grid-template-columns:1fr 1fr}
+  .span-2{grid-column:span 2}
+  .card{background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--border);padding:20px 22px;min-width:0}
+  .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:8px;flex-wrap:wrap}
+  .card-title{font-size:12px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em}
+  .ai-card{border:1px dashed var(--gray-300);background:linear-gradient(180deg,#fbfaf6,#fff)}
+  .ai-badge{font-size:10px;padding:2px 8px;border-radius:10px;background:var(--blue-pale);color:var(--blue-dark);font-weight:500}
+  .ai-text{font-size:13px;color:var(--gray-700);line-height:1.7}
+  .filter-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .filter-row:last-child{margin-bottom:0}
+  .filter-label{font-size:11px;font-weight:600;color:var(--gray-500);width:44px;flex-shrink:0}
+  .chips{display:flex;gap:4px;flex-wrap:wrap}
+  .chip{padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;font-size:12px;cursor:pointer;font-family:inherit;color:var(--gray-500);transition:all .15s}
+  .chip:hover{background:var(--gray-100)}
+  .chip.active{background:var(--blue-pale);color:var(--blue-dark);border-color:transparent;font-weight:500}
+  .date-in,.text-in{padding:5px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);font-family:inherit;font-size:12px;color:var(--gray-700);background:var(--white)}
+  .text-in{width:240px;max-width:100%}
+  .range-sep{font-size:12px;color:var(--gray-500)}
+  .result-line{font-size:12px;color:var(--gray-500);margin-top:4px}
+  .bar-list{display:flex;flex-direction:column;gap:8px}
+  .bar-row{display:flex;align-items:center;gap:10px}
+  .bar-label{font-size:12px;color:var(--gray-900);width:60px;flex-shrink:0;white-space:nowrap}
+  .bar-track{flex:1;height:7px;background:var(--gray-100);border-radius:4px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+  .bar-pct{font-size:12px;color:var(--gray-500);width:42px;text-align:right;flex-shrink:0}
+  .bar-cnt{font-size:11px;color:var(--gray-500);width:48px;text-align:right;flex-shrink:0}
+  .chart-box{position:relative;height:220px}
+  .review-feed{display:flex;flex-direction:column;gap:8px}
+  .review-item{background:var(--gray-100);border-radius:var(--radius-md);padding:12px 14px;border-left:3px solid var(--gray-300)}
+  .review-top{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap}
+  .badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500}
+  .badge.pf-google{background:#E6F1FB;color:#0C447C}
+  .badge.pf-naver{background:#E1F5EE;color:#0F6E56}
+  .badge.star{background:#FAEEDA;color:#7A4A00}
+  .badge.edited{background:#f0efe8;color:#555}
+  .review-meta{font-size:10px;color:var(--gray-500)}
+  .review-text{font-size:13px;color:var(--gray-900);line-height:1.6;word-break:break-word}
+  .review-text.empty{color:var(--gray-500);font-style:italic}
+  details.trans{margin-top:6px;font-size:12px;color:var(--gray-700)}
+  details.trans summary{cursor:pointer;color:var(--gray-500);font-size:11px}
+  details.trans p{margin-top:4px;line-height:1.6}
+  .more-btn{display:block;margin:14px auto 0;font-size:12px;padding:6px 18px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--white);color:var(--gray-700);cursor:pointer;font-family:inherit}
+  .more-btn:hover{background:var(--gray-100)}
+  .empty-msg{color:var(--gray-500);font-size:13px;padding:12px 0}
+  .loading{display:flex;align-items:center;justify-content:center;height:300px;flex-direction:column;gap:12px;color:var(--gray-500)}
+  .spinner{width:28px;height:28px;border:3px solid var(--gray-300);border-top-color:var(--blue-mid);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .hidden{display:none!important}
+  @media(max-width:900px){.content{padding:calc(var(--nav-h) + 16px) 16px 32px}.grid-2{grid-template-columns:1fr}.span-2{grid-column:span 1}.metrics{grid-template-columns:repeat(2,1fr)}.last-updated{display:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo"><div class="nav-dot"></div><span>루프캣미 리뷰</span></div>
+  <div class="nav-divider"></div>
+  <a class="nav-link" href="index.html">← 유입경로 대시보드</a>
+  <div class="nav-right">
+    <span class="last-updated" id="last-updated"></span>
+    <button class="refresh-btn" onclick="loadData()">↻ 새로고침</button>
+  </div>
+</nav>
+
+<main class="content">
+  <div class="page-header">
+    <span class="page-badge">구글 · 네이버 리뷰</span>
+    <h1 class="page-title">리뷰 대시보드</h1>
+    <p class="page-sub" id="page-sub">데이터 불러오는 중...</p>
+  </div>
+
+  <div id="loading" class="loading"><div class="spinner"></div>리뷰 불러오는 중...</div>
+
+  <div id="app" class="hidden">
+    <div class="card ai-card" style="margin-bottom:16px">
+      <div class="card-header">
+        <span class="card-title">AI 리뷰 요약</span>
+        <span class="ai-badge">준비 중</span>
+      </div>
+      <p class="ai-text">리뷰를 AI가 요약해서 이 자리에 보여줄 예정이에요. 월별 요약, 별점대별 요약(저별점 원인 등)을 붙일 수 있도록 자리를 비워 두었어요.</p>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="filter-row" id="row-branch" style="display:none">
+        <span class="filter-label">지점</span><div class="chips" id="chips-branch"></div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">플랫폼</span>
+        <div class="chips">
+          <button class="chip" data-g="platform" data-v="all">전체</button>
+          <button class="chip" data-g="platform" data-v="구글">구글</button>
+          <button class="chip" data-g="platform" data-v="네이버">네이버</button>
+        </div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">별점</span>
+        <div class="chips">
+          <button class="chip" data-g="rating" data-v="all">전체</button>
+          <button class="chip" data-g="rating" data-v="5">★5</button>
+          <button class="chip" data-g="rating" data-v="4">★4</button>
+          <button class="chip" data-g="rating" data-v="3">★3</button>
+          <button class="chip" data-g="rating" data-v="2">★2</button>
+          <button class="chip" data-g="rating" data-v="1">★1</button>
+          <button class="chip" data-g="rating" data-v="low">1~3점 모아보기</button>
+          <button class="chip" data-g="rating" data-v="none">별점 없음(네이버)</button>
+        </div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">기간</span>
+        <div class="chips" id="chips-period"></div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label"></span>
+        <input type="date" class="date-in" id="f-from" onchange="onDateInput()">
+        <span class="range-sep">~</span>
+        <input type="date" class="date-in" id="f-to" onchange="onDateInput()">
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">언어</span>
+        <div class="chips">
+          <button class="chip" data-g="lang" data-v="all">전체</button>
+          <button class="chip" data-g="lang" data-v="한글">한글</button>
+          <button class="chip" data-g="lang" data-v="외국어">외국어</button>
+          <button class="chip" data-g="lang" data-v="별점만">별점만</button>
+        </div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">검색</span>
+        <input type="text" class="text-in" id="f-q" placeholder="본문에서 검색 (예: 직원, 간식)" oninput="onSearchInput()">
+      </div>
+      <div class="result-line" id="result-line"></div>
+    </div>
+
+    <div class="metrics" id="metrics"></div>
+
+    <div class="grid grid-2">
+      <div class="card span-2">
+        <div class="card-header"><span class="card-title">월별 리뷰 수</span></div>
+        <div class="chart-box"><canvas id="chartCount"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">월별 평균 별점 (구글)</span></div>
+        <div class="chart-box"><canvas id="chartRating"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">별점 분포 (구글)</span></div>
+        <div class="bar-list" id="rating-dist"></div>
+        <div class="card-header" style="margin-top:22px"><span class="card-title">언어 구성</span></div>
+        <div class="bar-list" id="lang-dist"></div>
+      </div>
+      <div class="card span-2">
+        <div class="card-header">
+          <span class="card-title">리뷰 모아보기</span>
+          <span id="feed-count" style="font-size:11px;color:var(--gray-500)"></span>
+        </div>
+        <div class="review-feed" id="feed"></div>
+        <button class="more-btn hidden" id="more-btn" onclick="showMore()">더 보기</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// 설문 스프레드시트의 '리뷰' 탭을 웹에 게시한 CSV 주소
+const REVIEW_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRixukIJsxMyHEGP6ilnKktBXmmMYfU0NUokXCOprjaFT452pMoJ7YpUTZQKbVOZgLlociJ2TJGkR62/pub?gid=1258732567&single=true&output=csv';
+
+const BRANCH_LABEL = {'홍대':'홍대점','명동':'명동점'};
+const PF_COLOR = {'구글':'#185FA5','네이버':'#1D9E75'};
+const STAR_COLOR = {5:'#0F6E56',4:'#378ADD',3:'#BA7517',2:'#D62E2E',1:'#D62E2E'};
+const PAGE_SIZE = 50;
+
+let ALL = [];
+let FILTERED = [];
+let shown = PAGE_SIZE;
+let charts = {};
+let searchTimer = null;
+const F = {platform:'all', rating:'all', lang:'all', branch:'all', period:'all', from:'', to:'', q:''};
+
+function pad(n){ return String(n).padStart(2,'0'); }
+function ymd(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function esc(s){
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function normDate(s){
+  const m = String(s||'').match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+  return m ? m[1]+'-'+pad(m[2])+'-'+pad(m[3]) : '';
+}
+
+// 따옴표 안 줄바꿈까지 처리하는 CSV 파서
+function parseCSV(text) {
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  const rows = [];
+  let row = [], cur = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') {
+        if (text[i+1] === '"') { cur += '"'; i++; }
+        else q = false;
+      } else cur += c;
+    } else if (c === '"') q = true;
+    else if (c === ',') { row.push(cur); cur = ''; }
+    else if (c === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; }
+    else if (c === '\r') { /* skip */ }
+    else cur += c;
+  }
+  if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+  return rows;
+}
+
+function toReviews(rows) {
+  if (!rows.length) return [];
+  const header = rows[0].map(h => h.replace(/[\s\u00A0\uFEFF]+/g, ''));
+  const idx = {};
+  header.forEach((h, i) => { idx[h] = i; });
+  const get = (r, name) => (idx[name] === undefined ? '' : (r[idx[name]] || '')).trim();
+  return rows.slice(1).map(r => {
+    const star = parseInt(get(r, '별점'), 10);
+    return {
+      pf: get(r, '플랫폼'),
+      branch: get(r, '지점') || '홍대',
+      date: normDate(get(r, '작성일')),
+      star: star >= 1 && star <= 5 ? star : null,
+      author: get(r, '작성자'),
+      body: get(r, '본문'),
+      trans: get(r, '번역'),
+      lang: get(r, '언어'),
+      edited: get(r, '수정여부') === 'Y'
+    };
+  }).filter(r => r.date && r.pf).sort((a, b) => b.date.localeCompare(a.date));
+}
+
+async function loadData() {
+  document.getElementById('loading').classList.remove('hidden');
+  document.getElementById('app').classList.add('hidden');
+  try {
+    const res = await fetch(REVIEW_CSV_URL + '&t=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    ALL = toReviews(parseCSV(await res.text()));
+    document.getElementById('last-updated').textContent = '업데이트: ' + new Date().toLocaleString('ko-KR', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'});
+    if (!ALL.length) throw new Error('empty');
+    buildDynamicFilters();
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    applyAndRender();
+  } catch (e) {
+    document.getElementById('loading').innerHTML = '데이터를 불러올 수 없습니다. 잠시 후 새로고침해 주세요.';
+    document.getElementById('page-sub').textContent = '';
+  }
+}
+
+function buildDynamicFilters() {
+  // 지점 칩: 지점이 2개 이상일 때만 표시
+  const branches = [...new Set(ALL.map(r => r.branch))];
+  const rowEl = document.getElementById('row-branch');
+  if (branches.length > 1) {
+    rowEl.style.display = 'flex';
+    document.getElementById('chips-branch').innerHTML =
+      '<button class="chip" data-g="branch" data-v="all">전체</button>' +
+      branches.map(b => `<button class="chip" data-g="branch" data-v="${esc(b)}">${esc(BRANCH_LABEL[b] || b)}</button>`).join('');
+  } else {
+    rowEl.style.display = 'none';
+    F.branch = 'all';
+  }
+  // 기간 칩: 전체 / 최근 30일 / 최근 90일 / 데이터에 있는 연도
+  const years = [...new Set(ALL.map(r => r.date.slice(0, 4)))].sort().reverse();
+  document.getElementById('chips-period').innerHTML =
+    '<button class="chip" data-g="period" data-v="all">전체</button>' +
+    '<button class="chip" data-g="period" data-v="d30">최근 30일</button>' +
+    '<button class="chip" data-g="period" data-v="d90">최근 90일</button>' +
+    years.map(y => `<button class="chip" data-g="period" data-v="y${y}">${y}년</button>`).join('');
+  document.querySelectorAll('.chip').forEach(b => { b.onclick = () => setF(b.dataset.g, b.dataset.v); });
+  updateChips();
+}
+
+function setF(g, v) {
+  if (g === 'period') {
+    F.period = v;
+    const today = new Date();
+    if (v === 'all') { F.from = ''; F.to = ''; }
+    else if (v === 'd30' || v === 'd90') {
+      const d = new Date(today); d.setDate(d.getDate() - (v === 'd30' ? 30 : 90));
+      F.from = ymd(d); F.to = ymd(today);
+    } else if (v[0] === 'y') { F.from = v.slice(1) + '-01-01'; F.to = v.slice(1) + '-12-31'; }
+    document.getElementById('f-from').value = F.from;
+    document.getElementById('f-to').value = F.to;
+  } else {
+    F[g] = v;
+  }
+  updateChips();
+  applyAndRender();
+}
+
+function onDateInput() {
+  F.from = document.getElementById('f-from').value;
+  F.to = document.getElementById('f-to').value;
+  F.period = 'custom';
+  updateChips();
+  applyAndRender();
+}
+
+function onSearchInput() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    F.q = document.getElementById('f-q').value.trim().toLowerCase();
+    applyAndRender();
+  }, 250);
+}
+
+function updateChips() {
+  document.querySelectorAll('.chip').forEach(b => {
+    b.classList.toggle('active', String(F[b.dataset.g]) === b.dataset.v);
+  });
+}
+
+function applyAndRender() {
+  shown = PAGE_SIZE;
+  FILTERED = ALL.filter(r => {
+    if (F.platform !== 'all' && r.pf !== F.platform) return false;
+    if (F.branch !== 'all' && r.branch !== F.branch) return false;
+    if (F.lang !== 'all' && r.lang !== F.lang) return false;
+    if (F.rating === 'none') { if (r.star !== null) return false; }
+    else if (F.rating === 'low') { if (r.star === null || r.star > 3) return false; }
+    else if (F.rating !== 'all') { if (r.star !== parseInt(F.rating, 10)) return false; }
+    if (F.from && r.date < F.from) return false;
+    if (F.to && r.date > F.to) return false;
+    if (F.q && !(r.body + ' ' + r.trans).toLowerCase().includes(F.q)) return false;
+    return true;
+  });
+  const dates = ALL.map(r => r.date);
+  document.getElementById('page-sub').textContent =
+    `전체 ${ALL.length.toLocaleString()}건 · ${dates[dates.length-1]} ~ ${dates[0]}`;
+  document.getElementById('result-line').textContent =
+    `필터 결과 ${FILTERED.length.toLocaleString()}건 / 전체 ${ALL.length.toLocaleString()}건`;
+  renderMetrics();
+  renderCharts();
+  renderDists();
+  renderFeed();
+}
+
+function monthKey(d) { return d.slice(0, 7); }
+function monthRange(a, b) {
+  const out = [];
+  let [y, m] = a.split('-').map(Number);
+  const [ey, em] = b.split('-').map(Number);
+  while (y < ey || (y === ey && m <= em)) {
+    out.push(y + '-' + pad(m));
+    m++; if (m > 12) { m = 1; y++; }
+  }
+  return out;
+}
+
+function renderMetrics() {
+  const el = document.getElementById('metrics');
+  const g = FILTERED.filter(r => r.pf === '구글');
+  const n = FILTERED.filter(r => r.pf === '네이버');
+  const rated = FILTERED.filter(r => r.star !== null);
+  const avg = rated.length ? (rated.reduce((s, r) => s + r.star, 0) / rated.length).toFixed(2) : '-';
+
+  let lastCard = '';
+  if (FILTERED.length) {
+    const cnt = {};
+    FILTERED.forEach(r => { const k = monthKey(r.date); cnt[k] = (cnt[k] || 0) + 1; });
+    const keys = Object.keys(cnt).sort();
+    const last = keys[keys.length - 1];
+    let [y, m] = last.split('-').map(Number);
+    m--; if (m < 1) { m = 12; y--; }
+    const prev = y + '-' + pad(m);
+    let note = '';
+    if (cnt[prev]) {
+      const gr = ((cnt[last] - cnt[prev]) / cnt[prev] * 100).toFixed(1);
+      note = `<div class="metric-note ${gr >= 0 ? 'metric-up' : 'metric-down'}">${gr >= 0 ? '▲' : '▼'} ${Math.abs(gr)}% 전월 대비</div>`;
+    }
+    lastCard = `<div class="metric-card"><div class="metric-label">최근 월 (${last.replace('-', '.')})</div><div class="metric-value">${cnt[last].toLocaleString()}건</div>${note}</div>`;
+  }
+
+  el.innerHTML = `
+    <div class="metric-card"><div class="metric-label">리뷰 수</div><div class="metric-value">${FILTERED.length.toLocaleString()}건</div><div class="metric-note">필터 결과</div></div>
+    <div class="metric-card"><div class="metric-label">평균 별점 (구글)</div><div class="metric-value">${avg}${avg !== '-' ? '<span style="font-size:14px;font-weight:500"> / 5</span>' : ''}</div><div class="metric-note">별점 ${rated.length.toLocaleString()}건 기준</div></div>
+    <div class="metric-card"><div class="metric-label">구글</div><div class="metric-value">${g.length.toLocaleString()}건</div></div>
+    <div class="metric-card"><div class="metric-label">네이버</div><div class="metric-value">${n.length.toLocaleString()}건</div></div>
+    ${lastCard}`;
+}
+
+function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+function renderCharts() {
+  destroyChart('count'); destroyChart('rating');
+  if (!FILTERED.length) return;
+  const keys0 = FILTERED.map(r => monthKey(r.date)).sort();
+  const months = monthRange(keys0[0], keys0[keys0.length - 1]);
+  const gCnt = {}, nCnt = {}, sSum = {}, sN = {};
+  FILTERED.forEach(r => {
+    const k = monthKey(r.date);
+    if (r.pf === '구글') gCnt[k] = (gCnt[k] || 0) + 1;
+    if (r.pf === '네이버') nCnt[k] = (nCnt[k] || 0) + 1;
+    if (r.star !== null) { sSum[k] = (sSum[k] || 0) + r.star; sN[k] = (sN[k] || 0) + 1; }
+  });
+  const labels = months.map(k => k.slice(2).replace('-', '.'));
+  charts.count = new Chart(document.getElementById('chartCount'), {
+    type: 'bar',
+    data: { labels, datasets: [
+      {label:'구글', data: months.map(k => gCnt[k] || 0), backgroundColor: PF_COLOR['구글'], borderRadius: 3, stack: 's'},
+      {label:'네이버', data: months.map(k => nCnt[k] || 0), backgroundColor: PF_COLOR['네이버'], borderRadius: 3, stack: 's'}
+    ]},
+    options: {responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'top', labels:{boxWidth:10, font:{size:11}}}},
+      scales:{x:{stacked:true, grid:{display:false}, ticks:{font:{size:10}}}, y:{stacked:true, beginAtZero:true, grid:{color:'rgba(0,0,0,0.05)'}, ticks:{font:{size:11}}}}}
+  });
+  charts.rating = new Chart(document.getElementById('chartRating'), {
+    type: 'line',
+    data: { labels, datasets: [{
+      label:'평균 별점', data: months.map(k => sN[k] ? +(sSum[k] / sN[k]).toFixed(2) : null),
+      borderColor:'#185FA5', backgroundColor:'#185FA5', tension:0.25, spanGaps:true, pointRadius:3
+    }]},
+    options: {responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false}, ticks:{font:{size:10}}}, y:{suggestedMin:3, suggestedMax:5, grid:{color:'rgba(0,0,0,0.05)'}, ticks:{font:{size:11}}}}}
+  });
+}
+
+function barRows(items, total, colorFn) {
+  if (!total) return '<p class="empty-msg">데이터가 없습니다.</p>';
+  const max = Math.max(...items.map(i => i.cnt), 1);
+  return items.map(i => `
+    <div class="bar-row">
+      <span class="bar-label">${esc(i.label)}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${(i.cnt / max * 100).toFixed(1)}%;background:${colorFn(i)}"></div></div>
+      <span class="bar-pct">${(i.cnt / total * 100).toFixed(1)}%</span>
+      <span class="bar-cnt">${i.cnt.toLocaleString()}건</span>
+    </div>`).join('');
+}
+
+function renderDists() {
+  const rated = FILTERED.filter(r => r.star !== null);
+  const ratingItems = [5, 4, 3, 2, 1].map(s => ({label: '★' + s, cnt: rated.filter(r => r.star === s).length, s}));
+  document.getElementById('rating-dist').innerHTML = barRows(ratingItems, rated.length, i => STAR_COLOR[i.s]);
+  const langItems = ['한글', '외국어', '별점만'].map(l => ({label: l, cnt: FILTERED.filter(r => r.lang === l).length}));
+  document.getElementById('lang-dist').innerHTML = barRows(langItems, FILTERED.length, () => '#378ADD');
+}
+
+function renderFeed() {
+  const el = document.getElementById('feed');
+  const btn = document.getElementById('more-btn');
+  document.getElementById('feed-count').textContent = `총 ${FILTERED.length.toLocaleString()}건`;
+  if (!FILTERED.length) {
+    el.innerHTML = '<p class="empty-msg">조건에 맞는 리뷰가 없어요.</p>';
+    btn.classList.add('hidden');
+    return;
+  }
+  el.innerHTML = FILTERED.slice(0, shown).map(r => {
+    const border = r.star ? STAR_COLOR[r.star] : '#d3d1c7';
+    const body = r.body ? `<div class="review-text">${esc(r.body)}</div>` : '<div class="review-text empty">(별점만 남긴 리뷰)</div>';
+    const trans = r.trans ? `<details class="trans"><summary>번역 보기</summary><p>${esc(r.trans)}</p></details>` : '';
+    return `
+    <div class="review-item" style="border-left-color:${border}">
+      <div class="review-top">
+        <span class="badge ${r.pf === '구글' ? 'pf-google' : 'pf-naver'}">${esc(r.pf)}</span>
+        ${r.star ? `<span class="badge star">★${r.star}</span>` : ''}
+        <span class="review-meta">${esc(r.date)}</span>
+        <span class="review-meta">${esc(BRANCH_LABEL[r.branch] || r.branch)} · ${esc(r.author)}</span>
+        ${r.edited ? '<span class="badge edited">수정됨</span>' : ''}
+      </div>
+      ${body}${trans}
+    </div>`;
+  }).join('');
+  btn.classList.toggle('hidden', shown >= FILTERED.length);
+  btn.textContent = `더 보기 (${Math.min(shown, FILTERED.length).toLocaleString()} / ${FILTERED.length.toLocaleString()})`;
+}
+
+function showMore() { shown += PAGE_SIZE; renderFeed(); }
+
+loadData();
+</script>
+</body>
+</html>
