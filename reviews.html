@@ -55,6 +55,8 @@
   .chip{padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;font-size:12px;cursor:pointer;font-family:inherit;color:var(--gray-500);transition:all .15s}
   .chip:hover{background:var(--gray-100)}
   .chip.active{background:var(--blue-pale);color:var(--blue-dark);border-color:transparent;font-weight:500}
+  .chip:disabled{opacity:.35;cursor:not-allowed}
+  .chip:disabled:hover{background:transparent}
   .date-in,.text-in{padding:5px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);font-family:inherit;font-size:12px;color:var(--gray-700);background:var(--white)}
   .text-in{width:240px;max-width:100%}
   .range-sep{font-size:12px;color:var(--gray-500)}
@@ -327,6 +329,8 @@ function setF(g, v) {
     document.getElementById('f-to').value = F.to;
   } else {
     F[g] = v;
+    // 네이버는 별점이 없으므로, 별점 필터가 걸려 있었다면 '전체'로 되돌린다
+    if (g === 'platform' && v === '네이버' && F.rating !== 'all' && F.rating !== 'none') F.rating = 'all';
   }
   updateChips();
   applyAndRender();
@@ -351,6 +355,12 @@ function onSearchInput() {
 function updateChips() {
   document.querySelectorAll('.chip').forEach(b => {
     b.classList.toggle('active', String(F[b.dataset.g]) === b.dataset.v);
+  });
+  // 플랫폼이 네이버일 때는 별점 버튼(★1~5, 1~3점 모아보기)을 누를 수 없게 한다
+  const naverOnly = F.platform === '네이버';
+  document.querySelectorAll('.chip[data-g="rating"]').forEach(b => {
+    const needsStar = b.dataset.v !== 'all' && b.dataset.v !== 'none';
+    b.disabled = naverOnly && needsStar;
   });
 }
 
