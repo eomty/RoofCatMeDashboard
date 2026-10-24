@@ -91,6 +91,14 @@
   @keyframes spin{to{transform:rotate(360deg)}}
   .hidden{display:none!important}
   @media(max-width:900px){.content{padding:calc(var(--nav-h) + 16px) 16px 32px}.grid-2{grid-template-columns:1fr}.span-2{grid-column:span 1}.metrics{grid-template-columns:repeat(2,1fr)}.last-updated{display:none}}
+  /* 블로그 후기 카드 (기존 .chip 과 충돌하지 않게 .bchip 사용) */
+  .bchip{padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;font-size:12px;cursor:pointer;font-family:inherit;color:var(--gray-500);transition:all .15s}
+  .bchip:hover{background:var(--gray-100)}
+  .bchip.active{background:var(--blue-pale);color:var(--blue-dark);border-color:transparent;font-weight:500}
+  .blog-title{display:block;font-size:14px;font-weight:600;color:var(--gray-900);text-decoration:none;line-height:1.5;margin-bottom:4px;word-break:break-word}
+  .blog-title:hover{text-decoration:underline}
+  .badge.pf-blog{background:#E1F5EE;color:#0F6E56}
+  .badge.pf-cafe{background:#FAEEDA;color:#7A4A00}
 </style>
 </head>
 <body>
@@ -101,7 +109,7 @@
   <a class="nav-link" href="index.html">← 유입경로 대시보드</a>
   <div class="nav-right">
     <span class="last-updated" id="last-updated"></span>
-    <button class="refresh-btn" onclick="loadData()">↻ 새로고침</button>
+    <button class="refresh-btn" onclick="loadData();loadBlog()">↻ 새로고침</button>
   </div>
 </nav>
 
@@ -200,6 +208,33 @@
         <button class="more-btn hidden" id="more-btn" onclick="showMore()">더 보기</button>
       </div>
     </div>
+  </div>
+
+  <div class="card hidden" id="blog-card" style="margin-top:16px">
+    <div class="card-header">
+      <span class="card-title">네이버 블로그 후기</span>
+      <span id="blog-count" style="font-size:11px;color:var(--gray-500)"></span>
+    </div>
+    <p class="page-sub" style="margin:-4px 0 12px">별점 없이 글로 남긴 후기예요. 제목을 누르면 원문 블로그로 이동해요.</p>
+    <div class="filter-row" id="blog-row-branch">
+      <span class="filter-label">지점</span><div class="chips" id="blog-chips-branch"></div>
+    </div>
+    <div class="filter-row">
+      <span class="filter-label">기간</span><div class="chips" id="blog-chips-period"></div>
+    </div>
+    <div class="filter-row">
+      <span class="filter-label"></span>
+      <input type="date" class="date-in" id="blog-from" onchange="blogDateInput()">
+      <span class="range-sep">~</span>
+      <input type="date" class="date-in" id="blog-to" onchange="blogDateInput()">
+    </div>
+    <div class="filter-row">
+      <span class="filter-label">검색</span>
+      <input type="text" class="text-in" id="blog-q" placeholder="제목·요약에서 검색 (예: 데이트, 아이)" oninput="blogSearchInput()">
+    </div>
+    <div class="result-line" id="blog-result" style="margin-bottom:10px"></div>
+    <div class="review-feed" id="blog-feed"></div>
+    <button class="more-btn hidden" id="blog-more" onclick="blogShowMore()">더 보기</button>
   </div>
 </main>
 
@@ -521,7 +556,155 @@ function renderFeed() {
 
 function showMore() { shown += PAGE_SIZE; renderFeed(); }
 
+// ───── 네이버 블로그 후기 (기존 리뷰 기능과 별개로 동작) ─────
+// 구글 시트 '블로그' 탭을 웹에 게시한 CSV 주소를 아래 따옴표 안에 붙여 넣으세요. 비워 두면 이 카드는 숨겨져요.
+const BLOG_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRixukIJsxMyHEGP6ilnKktBXmmMYfU0NUokXCOprjaFT452pMoJ7YpUTZQKbVOZgLlociJ2TJGkR62/pub?gid=52043169&single=true&output=csv';
+
+let BLOG_ALL = [], BLOG_FILTERED = [], blogShown = 30, blogTimer = null;
+const BLOG_PAGE = 30;
+const BF = {branch:'all', period:'all', from:'', to:'', q:''};
+
+function toBlogs(rows) {
+  if (!rows.length) return [];
+  const header = rows[0].map(h => h.replace(/[\s\u00A0\uFEFF]+/g, ''));
+  const idx = {};
+  header.forEach((h, i) => { idx[h] = i; });
+  const get = (r, name) => (idx[name] === undefined ? '' : (r[idx[name]] || '')).trim();
+  return rows.slice(1).map(r => ({
+    branch: get(r, '지점') || '미상',
+    date: normDate(get(r, '작성일')),
+    kind: get(r, '종류') || '블로그',
+    blog: get(r, '블로그명'),
+    title: get(r, '제목'),
+    summary: get(r, '요약'),
+    link: get(r, '링크')
+  })).filter(r => r.date && r.title).sort((a, b) => b.date.localeCompare(a.date));
+}
+
+async function loadBlog() {
+  const card = document.getElementById('blog-card');
+  if (!BLOG_CSV_URL) { card.classList.add('hidden'); return; }
+  try {
+    const res = await fetch(BLOG_CSV_URL + (BLOG_CSV_URL.includes('?') ? '&' : '?') + 't=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    BLOG_ALL = toBlogs(parseCSV(await res.text()));
+    if (!BLOG_ALL.length) throw new Error('empty');
+    buildBlogFilters();
+    card.classList.remove('hidden');
+    applyBlog();
+  } catch (e) {
+    card.classList.add('hidden');
+  }
+}
+
+function buildBlogFilters() {
+  const order = ['홍대', '명동', '미상'];
+  const label = {'홍대':'홍대점', '명동':'명동점', '미상':'지점 미상'};
+  const have = order.filter(b => BLOG_ALL.some(r => r.branch === b));
+  document.getElementById('blog-row-branch').style.display = have.length > 1 ? 'flex' : 'none';
+  document.getElementById('blog-chips-branch').innerHTML =
+    '<button class="bchip" data-bg="branch" data-v="all">전체</button>' +
+    have.map(b => `<button class="bchip" data-bg="branch" data-v="${b}">${label[b]}</button>`).join('');
+  const years = [...new Set(BLOG_ALL.map(r => r.date.slice(0, 4)))].sort().reverse();
+  document.getElementById('blog-chips-period').innerHTML =
+    '<button class="bchip" data-bg="period" data-v="all">전체</button>' +
+    '<button class="bchip" data-bg="period" data-v="d30">최근 30일</button>' +
+    '<button class="bchip" data-bg="period" data-v="d90">최근 90일</button>' +
+    years.map(y => `<button class="bchip" data-bg="period" data-v="y${y}">${y}년</button>`).join('');
+  document.querySelectorAll('.bchip').forEach(b => { b.onclick = () => setBlogF(b.dataset.bg, b.dataset.v); });
+  updateBlogChips();
+}
+
+function setBlogF(g, v) {
+  if (g === 'period') {
+    BF.period = v;
+    const today = new Date();
+    if (v === 'all') { BF.from = ''; BF.to = ''; }
+    else if (v === 'd30' || v === 'd90') {
+      const d = new Date(today); d.setDate(d.getDate() - (v === 'd30' ? 30 : 90));
+      BF.from = ymd(d); BF.to = ymd(today);
+    } else if (v[0] === 'y') { BF.from = v.slice(1) + '-01-01'; BF.to = v.slice(1) + '-12-31'; }
+    document.getElementById('blog-from').value = BF.from;
+    document.getElementById('blog-to').value = BF.to;
+  } else {
+    BF[g] = v;
+  }
+  updateBlogChips();
+  applyBlog();
+}
+
+function blogDateInput() {
+  BF.from = document.getElementById('blog-from').value;
+  BF.to = document.getElementById('blog-to').value;
+  BF.period = 'custom';
+  updateBlogChips();
+  applyBlog();
+}
+
+function blogSearchInput() {
+  clearTimeout(blogTimer);
+  blogTimer = setTimeout(() => {
+    BF.q = document.getElementById('blog-q').value.trim().toLowerCase();
+    applyBlog();
+  }, 250);
+}
+
+function updateBlogChips() {
+  document.querySelectorAll('.bchip').forEach(b => {
+    b.classList.toggle('active', String(BF[b.dataset.bg]) === b.dataset.v);
+  });
+}
+
+function applyBlog() {
+  blogShown = BLOG_PAGE;
+  BLOG_FILTERED = BLOG_ALL.filter(r => {
+    if (BF.branch !== 'all' && r.branch !== BF.branch) return false;
+    if (BF.from && r.date < BF.from) return false;
+    if (BF.to && r.date > BF.to) return false;
+    if (BF.q && !(r.title + ' ' + r.summary + ' ' + r.blog).toLowerCase().includes(BF.q)) return false;
+    return true;
+  });
+  document.getElementById('blog-count').textContent = `전체 ${BLOG_ALL.length.toLocaleString()}건`;
+  document.getElementById('blog-result').textContent =
+    `필터 결과 ${BLOG_FILTERED.length.toLocaleString()}건 / 전체 ${BLOG_ALL.length.toLocaleString()}건`;
+  renderBlogFeed();
+}
+
+function safeLink(u) { return /^https?:\/\//i.test(u) ? u : ''; }
+
+function renderBlogFeed() {
+  const el = document.getElementById('blog-feed');
+  const btn = document.getElementById('blog-more');
+  if (!BLOG_FILTERED.length) {
+    el.innerHTML = '<p class="empty-msg">조건에 맞는 블로그 후기가 없어요.</p>';
+    btn.classList.add('hidden');
+    return;
+  }
+  const label = {'홍대':'홍대점', '명동':'명동점', '미상':'지점 미상'};
+  el.innerHTML = BLOG_FILTERED.slice(0, blogShown).map(r => {
+    const href = safeLink(r.link);
+    const title = href
+      ? `<a class="blog-title" href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(r.title)}</a>`
+      : `<span class="blog-title">${esc(r.title)}</span>`;
+    return `
+    <div class="review-item" style="border-left-color:#1D9E75">
+      <div class="review-top">
+        <span class="badge ${r.kind === '카페' ? 'pf-cafe' : 'pf-blog'}">${esc(r.kind)}</span>
+        <span class="review-meta">${esc(r.date)}</span>
+        <span class="review-meta">${esc(label[r.branch] || r.branch)} · ${esc(r.blog)}</span>
+      </div>
+      ${title}
+      <div class="review-text">${esc(r.summary)}</div>
+    </div>`;
+  }).join('');
+  btn.classList.toggle('hidden', blogShown >= BLOG_FILTERED.length);
+  btn.textContent = `더 보기 (${Math.min(blogShown, BLOG_FILTERED.length).toLocaleString()} / ${BLOG_FILTERED.length.toLocaleString()})`;
+}
+
+function blogShowMore() { blogShown += BLOG_PAGE; renderBlogFeed(); }
+
 loadData();
+loadBlog();
 </script>
 </body>
 </html>
