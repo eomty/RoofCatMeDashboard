@@ -138,23 +138,12 @@
     <p class="page-sub" id="page-sub">데이터 불러오는 중...</p>
   </div>
 
-  <div class="card ai-card" id="ai-card" style="margin-bottom:16px">
-      <div class="card-header">
-        <span class="card-title">AI 리뷰 요약</span>
-        <span class="ai-badge" id="ai-badge">준비 중</span>
-      </div>
-      <div id="ai-ctrl" style="display:none;margin-bottom:10px">
-        <select id="ai-period" onchange="renderAI()" style="font-size:12px;padding:4px 8px;border:1px solid var(--gray-300);border-radius:6px;background:#fff"></select>
-      </div>
-      <div id="ai-body"><p class="ai-text">리뷰를 AI가 요약해서 이 자리에 보여줄 예정이에요.</p></div>
-      <p class="ai-text" id="ai-foot" style="display:none;font-size:11px;color:var(--gray-500,#888);margin-top:10px"></p>
-    </div>
-
   <div class="tabs" id="tabs">
     <button class="tab active" data-tab="hongdae" id="tab-hongdae" onclick="switchTab('hongdae')">홍대점</button>
     <button class="tab" data-tab="myeongdong" id="tab-myeongdong" onclick="switchTab('myeongdong')">명동점</button>
     <button class="tab" data-tab="compare" id="tab-compare" onclick="switchTab('compare')">지점 비교</button>
     <button class="tab" data-tab="blog" id="tab-blog" onclick="switchTab('blog')">블로그 리뷰</button>
+    <button class="tab" data-tab="ai" id="tab-ai" onclick="switchTab('ai')" style="display:none">AI 요약</button>
   </div>
 
   <div id="pane-visitor">
@@ -259,6 +248,21 @@
           <div class="chart-box"><canvas id="chartBrRating"></canvas></div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div id="pane-ai" class="hidden">
+    <div class="card ai-card">
+      <div class="card-header">
+        <span class="card-title">AI 리뷰 요약</span>
+        <span class="ai-badge">AI 요약</span>
+      </div>
+      <div class="filter-row"><span class="filter-label">대상</span><div class="chips" id="ai-scope"></div></div>
+      <div class="filter-row" id="ai-ctrl"><span class="filter-label">기간</span>
+        <select id="ai-period" onchange="renderAI()" style="font-size:12px;padding:5px 8px;border:1px solid var(--gray-300);border-radius:6px;background:#fff;font-family:inherit"></select>
+      </div>
+      <div id="ai-body" style="margin-top:6px"></div>
+      <p class="ai-text" id="ai-foot" style="font-size:11px;margin-top:12px"></p>
     </div>
   </div>
 
@@ -875,6 +879,7 @@ function switchTab(name) {
   document.getElementById('pane-visitor').classList.toggle('hidden', !isBranch);
   document.getElementById('pane-compare').classList.toggle('hidden', name !== 'compare');
   document.getElementById('pane-blog').classList.toggle('hidden', name !== 'blog');
+  document.getElementById('pane-ai').classList.toggle('hidden', name !== 'ai');
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   try { history.replaceState(null, '', name === 'hongdae' ? location.pathname + location.search : '#' + name); } catch (e) {}
   if (isBranch) {
@@ -912,16 +917,26 @@ async function loadSummary() {
     const rows = parseCSV(await res.text());
     const h = rows[0].map(x => x.trim());
     const ix = n => h.indexOf(n);
-    SUMMARY = rows.slice(1).filter(r => r[ix('탭')]).map(r => ({tab:r[ix('탭')].trim(), period:r[ix('기간')].trim(), kind:r[ix('구분')].trim(), title:r[ix('제목')], text:r[ix('내용')], upd:r[ix('갱신일')]}));
+    SUMMARY = rows.slice(1).filter(r => r[ix('탭')] && r[ix('구분')].trim() !== '운영 제안').map(r => ({tab:r[ix('탭')].trim(), period:r[ix('기간')].trim(), kind:r[ix('구분')].trim(), title:r[ix('제목')], text:r[ix('내용')], upd:r[ix('갱신일')]}));
   } catch (e) { SUMMARY = []; }
   renderAI();
+  if (location.hash === '#ai' && SUMMARY.length) switchTab('ai');
 }
+let aiScope = '홍대';
+const AI_SCOPES = ['홍대','명동','비교','블로그'];
+const AI_SCOPE_LABEL = {'홍대':'홍대점','명동':'명동점','비교':'지점 비교','블로그':'블로그 리뷰'};
+const AI_KIND_COLOR = {'좋은 점':'#1D9E75','아쉬운 점':'#BA7517','저별점 분석':'#A32D2D','방문 목적':'#185FA5','인용':'#6b6b6b','운영 제안':'#534AB7','개요':'#2c2c2a','월별 요약':'#2c2c2a'};
+function setAiScope(k){ aiScope = k; renderAI(); }
 function renderAI() {
-  const tab = AI_TAB[currentTab] || '홍대';
-  const mine = SUMMARY.filter(r => r.tab === tab);
-  const sel = document.getElementById('ai-period');
-  const ctrl = document.getElementById('ai-ctrl'), body = document.getElementById('ai-body'), foot = document.getElementById('ai-foot'), badge = document.getElementById('ai-badge');
-  if (!mine.length) { ctrl.style.display = 'none'; foot.style.display = 'none'; badge.textContent = '준비 중'; body.innerHTML = '<p class="ai-text">리뷰를 AI가 요약해서 이 자리에 보여줄 예정이에요.</p>'; return; }
+  const tabBtn = document.getElementById('tab-ai');
+  if (!SUMMARY.length) { tabBtn.style.display = 'none'; if (currentTab === 'ai') switchTab('hongdae'); return; }
+  tabBtn.style.display = '';
+  if (currentTab !== 'ai') return;
+  const scopes = AI_SCOPES.filter(k => SUMMARY.some(r => r.tab === k));
+  if (!scopes.includes(aiScope)) aiScope = scopes[0];
+  document.getElementById('ai-scope').innerHTML = scopes.map(k => '<button class="chip' + (k === aiScope ? ' active' : '') + '" onclick="setAiScope(\'' + k + '\')">' + AI_SCOPE_LABEL[k] + '</button>').join('');
+  const mine = SUMMARY.filter(r => r.tab === aiScope);
+  const sel = document.getElementById('ai-period'), ctrl = document.getElementById('ai-ctrl');
   const months = [...new Set(mine.filter(r => r.period !== '전체').map(r => r.period))].sort().reverse();
   const cur = sel.value;
   if (months.length) {
@@ -930,11 +945,16 @@ function renderAI() {
     ctrl.style.display = '';
   } else { ctrl.style.display = 'none'; sel.value = '전체'; }
   const items = mine.filter(r => r.period === sel.value);
-  body.innerHTML = items.map(r => '<div style="margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--gray-700)">' + escH(r.kind === r.title ? r.title : r.kind + ' · ' + r.title) + '</div><p class="ai-text" style="margin:2px 0 0">' + escH(r.text) + '</p></div>').join('');
-  badge.textContent = 'AI 요약';
+  document.getElementById('ai-body').innerHTML = items.map(r => {
+    const c = AI_KIND_COLOR[r.kind] || '#2c2c2a';
+    const q = r.kind === '인용';
+    return '<div style="border:1px solid var(--gray-200,#e6e4dc);border-left:3px solid ' + c + ';border-radius:8px;padding:10px 14px;margin-bottom:10px;background:#fff">'
+      + '<div style="font-size:11px;font-weight:600;color:' + c + ';margin-bottom:2px">' + escH(r.kind) + '</div>'
+      + '<div style="font-size:13px;font-weight:600;color:var(--gray-800,#2c2c2a);margin-bottom:4px">' + escH(r.title) + '</div>'
+      + '<p class="ai-text" style="margin:0' + (q ? ';font-style:italic' : '') + '">' + escH(r.text) + '</p></div>';
+  }).join('');
   const upd = items.length ? items[0].upd : '';
-  foot.textContent = 'AI가 요약한 내용이라 원문과 다를 수 있어요.' + (upd ? ' · 갱신일 ' + upd : '');
-  foot.style.display = '';
+  document.getElementById('ai-foot').textContent = 'AI가 요약한 내용이라 원문과 다를 수 있어요.' + (upd ? ' · 갱신일 ' + upd : '');
 }
 
 loadData();
@@ -942,7 +962,7 @@ loadBlog();
 loadSummary();
 {
   const h = location.hash.replace('#', '');
-  if (['myeongdong', 'compare', 'blog'].includes(h)) switchTab(h);
+  if (['myeongdong', 'compare', 'blog', 'ai'].includes(h)) switchTab(h);
 }
 </script>
 </body>
