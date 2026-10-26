@@ -138,12 +138,16 @@
     <p class="page-sub" id="page-sub">데이터 불러오는 중...</p>
   </div>
 
-  <div class="card ai-card" style="margin-bottom:16px">
+  <div class="card ai-card" id="ai-card" style="margin-bottom:16px">
       <div class="card-header">
         <span class="card-title">AI 리뷰 요약</span>
-        <span class="ai-badge">준비 중</span>
+        <span class="ai-badge" id="ai-badge">준비 중</span>
       </div>
-      <p class="ai-text">리뷰를 AI가 요약해서 이 자리에 보여줄 예정이에요. 월별 요약, 별점대별 요약(저별점 원인 등)을 붙일 수 있도록 자리를 비워 두었어요.</p>
+      <div id="ai-ctrl" style="display:none;margin-bottom:10px">
+        <select id="ai-period" onchange="renderAI()" style="font-size:12px;padding:4px 8px;border:1px solid var(--gray-300);border-radius:6px;background:#fff"></select>
+      </div>
+      <div id="ai-body"><p class="ai-text">리뷰를 AI가 요약해서 이 자리에 보여줄 예정이에요.</p></div>
+      <p class="ai-text" id="ai-foot" style="display:none;font-size:11px;color:var(--gray-500,#888);margin-top:10px"></p>
     </div>
 
   <div class="tabs" id="tabs">
@@ -879,6 +883,7 @@ function switchTab(name) {
   } else if (name === 'compare' && ALL.length) {
     renderBranchCompare();
   }
+  renderAI();
   window.dispatchEvent(new Event('resize'));
 }
 
@@ -894,8 +899,47 @@ function updateTabVisibility() {
   }
 }
 
+// ===== AI 요약 (시트의 '요약' 탭) =====
+const SUMMARY_CSV_URL = '';  // 요약 탭의 게시 CSV 주소를 여기에 넣으세요
+let SUMMARY = [];
+const AI_TAB = {hongdae:'홍대', myeongdong:'명동', compare:'비교', blog:'블로그'};
+function escH(t){return String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+async function loadSummary() {
+  if (!SUMMARY_CSV_URL) return;
+  try {
+    const res = await fetch(SUMMARY_CSV_URL + (SUMMARY_CSV_URL.includes('?') ? '&' : '?') + 't=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const rows = parseCSV(await res.text());
+    const h = rows[0].map(x => x.trim());
+    const ix = n => h.indexOf(n);
+    SUMMARY = rows.slice(1).filter(r => r[ix('탭')]).map(r => ({tab:r[ix('탭')].trim(), period:r[ix('기간')].trim(), kind:r[ix('구분')].trim(), title:r[ix('제목')], text:r[ix('내용')], upd:r[ix('갱신일')]}));
+  } catch (e) { SUMMARY = []; }
+  renderAI();
+}
+function renderAI() {
+  const tab = AI_TAB[currentTab] || '홍대';
+  const mine = SUMMARY.filter(r => r.tab === tab);
+  const sel = document.getElementById('ai-period');
+  const ctrl = document.getElementById('ai-ctrl'), body = document.getElementById('ai-body'), foot = document.getElementById('ai-foot'), badge = document.getElementById('ai-badge');
+  if (!mine.length) { ctrl.style.display = 'none'; foot.style.display = 'none'; badge.textContent = '준비 중'; body.innerHTML = '<p class="ai-text">리뷰를 AI가 요약해서 이 자리에 보여줄 예정이에요.</p>'; return; }
+  const months = [...new Set(mine.filter(r => r.period !== '전체').map(r => r.period))].sort().reverse();
+  const cur = sel.value;
+  if (months.length) {
+    sel.innerHTML = '<option value="전체">전체 요약</option>' + months.map(m => '<option value="' + m + '">' + m + ' 월별</option>').join('');
+    sel.value = (cur === '전체' || months.includes(cur)) ? cur : '전체';
+    ctrl.style.display = '';
+  } else { ctrl.style.display = 'none'; sel.value = '전체'; }
+  const items = mine.filter(r => r.period === sel.value);
+  body.innerHTML = items.map(r => '<div style="margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--gray-700)">' + escH(r.kind === r.title ? r.title : r.kind + ' · ' + r.title) + '</div><p class="ai-text" style="margin:2px 0 0">' + escH(r.text) + '</p></div>').join('');
+  badge.textContent = 'AI 요약';
+  const upd = items.length ? items[0].upd : '';
+  foot.textContent = 'AI가 요약한 내용이라 원문과 다를 수 있어요.' + (upd ? ' · 갱신일 ' + upd : '');
+  foot.style.display = '';
+}
+
 loadData();
 loadBlog();
+loadSummary();
 {
   const h = location.hash.replace('#', '');
   if (['myeongdong', 'compare', 'blog'].includes(h)) switchTab(h);
