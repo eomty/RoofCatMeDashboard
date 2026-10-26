@@ -900,7 +900,7 @@ function updateTabVisibility() {
 }
 
 // ===== AI 요약 (시트의 '요약' 탭) =====
-const SUMMARY_CSV_URL = '';  // 요약 탭의 게시 CSV 주소를 여기에 넣으세요
+const SUMMARY_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRixukIJsxMyHEGP6ilnKktBXmmMYfU0NUokXCOprjaFT452pMoJ7YpUTZQKbVOZgLlociJ2TJGkR62/pub?gid=788093877&single=true&output=csv';
 let SUMMARY = [];
 const AI_TAB = {hongdae:'홍대', myeongdong:'명동', compare:'비교', blog:'블로그'};
 function escH(t){return String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
