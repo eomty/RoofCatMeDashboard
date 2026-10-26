@@ -103,6 +103,9 @@
   .tab{padding:9px 18px;font-size:14px;font-weight:500;color:var(--gray-500);background:transparent;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;font-family:inherit}
   .tab:hover{color:var(--gray-900)}
   .tab.active{color:var(--blue-dark);border-bottom-color:var(--blue-dark)}
+  .cchip{padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;font-size:12px;cursor:pointer;font-family:inherit;color:var(--gray-500);transition:all .15s}
+  .cchip:hover{background:var(--gray-100)}
+  .cchip.active{background:var(--blue-pale);color:var(--blue-dark);border-color:transparent;font-weight:500}
   /* 지점 비교 */
   .cmp-legend{display:flex;gap:14px;font-size:12px;color:var(--gray-700)}
   .cmp-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:baseline}
@@ -144,7 +147,9 @@
     </div>
 
   <div class="tabs" id="tabs">
-    <button class="tab active" data-tab="visitor" onclick="switchTab('visitor')">방문자 리뷰</button>
+    <button class="tab active" data-tab="hongdae" id="tab-hongdae" onclick="switchTab('hongdae')">홍대점</button>
+    <button class="tab" data-tab="myeongdong" id="tab-myeongdong" onclick="switchTab('myeongdong')">명동점</button>
+    <button class="tab" data-tab="compare" id="tab-compare" onclick="switchTab('compare')">지점 비교</button>
     <button class="tab" data-tab="blog" id="tab-blog" onclick="switchTab('blog')">블로그 리뷰</button>
   </div>
 
@@ -154,9 +159,6 @@
   <div id="app" class="hidden">
 
     <div class="card" style="margin-bottom:16px">
-      <div class="filter-row" id="row-branch" style="display:none">
-        <span class="filter-label">지점</span><div class="chips" id="chips-branch"></div>
-      </div>
       <div class="filter-row">
         <span class="filter-label">플랫폼</span>
         <div class="chips">
@@ -205,27 +207,6 @@
 
     <div class="metrics" id="metrics"></div>
 
-    <div id="cmp-wrap">
-      <div class="card" style="margin-bottom:16px">
-        <div class="card-header">
-          <span class="card-title">홍대점 · 명동점 비교</span>
-          <div class="cmp-legend"><span><i class="cmp-dot" style="background:#185FA5"></i>홍대점</span><span><i class="cmp-dot" style="background:#993556"></i>명동점</span></div>
-        </div>
-        <p class="cmp-note">지점 필터와 상관없이 두 지점을 함께 보여줘요. 기간·플랫폼·별점·언어·검색 필터는 그대로 적용돼요.</p>
-        <div id="cmp-table"></div>
-      </div>
-      <div class="grid grid-2">
-        <div class="card">
-          <div class="card-header"><span class="card-title">월별 리뷰 수 · 지점별</span></div>
-          <div class="chart-box"><canvas id="chartBrCount"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-header"><span class="card-title">월별 평균 별점 (구글) · 지점별</span></div>
-          <div class="chart-box"><canvas id="chartBrRating"></canvas></div>
-        </div>
-      </div>
-    </div>
-
     <div class="grid grid-2">
       <div class="card span-2">
         <div class="card-header"><span class="card-title">월별 리뷰 수</span></div>
@@ -251,6 +232,30 @@
       </div>
     </div>
   </div>
+  </div>
+
+  <div id="pane-compare" class="hidden">
+    <div id="cmp-wrap">
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header">
+          <span class="card-title">홍대점 · 명동점 비교</span>
+          <div class="cmp-legend"><span><i class="cmp-dot" style="background:#185FA5"></i>홍대점</span><span><i class="cmp-dot" style="background:#993556"></i>명동점</span></div>
+        </div>
+        <div class="filter-row" style="margin-bottom:6px"><span class="filter-label">기간</span><div class="chips" id="cmp-chips-period"></div></div>
+        <p class="cmp-note">홍대점과 명동점 전체 리뷰(구글+네이버)를 같은 기간으로 비교해요. 평균 별점은 구글 리뷰만 계산해요.</p>
+        <div id="cmp-table"></div>
+      </div>
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="card-header"><span class="card-title">월별 리뷰 수 · 지점별</span></div>
+          <div class="chart-box"><canvas id="chartBrCount"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">월별 평균 별점 (구글) · 지점별</span></div>
+          <div class="chart-box"><canvas id="chartBrRating"></canvas></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="pane-blog" class="hidden">
@@ -297,7 +302,7 @@ let FILTERED = [];
 let shown = PAGE_SIZE;
 let charts = {};
 let searchTimer = null;
-const F = {platform:'all', rating:'all', lang:'all', branch:'all', period:'all', from:'', to:'', q:''};
+const F = {platform:'all', rating:'all', lang:'all', branch:'홍대', period:'all', from:'', to:'', q:''};
 
 function pad(n){ return String(n).padStart(2,'0'); }
 function ymd(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
@@ -363,9 +368,12 @@ async function loadData() {
     document.getElementById('last-updated').textContent = '업데이트: ' + new Date().toLocaleString('ko-KR', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'});
     if (!ALL.length) throw new Error('empty');
     buildDynamicFilters();
+    buildCompareFilters();
+    updateTabVisibility();
     document.getElementById('loading').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
     applyAndRender();
+    if (currentTab === 'compare') renderBranchCompare();
   } catch (e) {
     document.getElementById('loading').innerHTML = '데이터를 불러올 수 없습니다. 잠시 후 새로고침해 주세요.';
     document.getElementById('page-sub').textContent = '';
@@ -373,18 +381,6 @@ async function loadData() {
 }
 
 function buildDynamicFilters() {
-  // 지점 칩: 지점이 2개 이상일 때만 표시
-  const branches = [...new Set(ALL.map(r => r.branch))];
-  const rowEl = document.getElementById('row-branch');
-  if (branches.length > 1) {
-    rowEl.style.display = 'flex';
-    document.getElementById('chips-branch').innerHTML =
-      '<button class="chip" data-g="branch" data-v="all">전체</button>' +
-      branches.map(b => `<button class="chip" data-g="branch" data-v="${esc(b)}">${esc(BRANCH_LABEL[b] || b)}</button>`).join('');
-  } else {
-    rowEl.style.display = 'none';
-    F.branch = 'all';
-  }
   // 기간 칩: 전체 / 최근 30일 / 최근 90일 / 데이터에 있는 연도
   const years = [...new Set(ALL.map(r => r.date.slice(0, 4)))].sort().reverse();
   document.getElementById('chips-period').innerHTML =
@@ -467,7 +463,6 @@ function applyAndRender() {
   renderCharts();
   renderDists();
   renderFeed();
-  renderBranchCompare();
 }
 
 function monthKey(d) { return d.slice(0, 7); }
@@ -761,26 +756,44 @@ const BR = [
   {k:'명동', label:'명동점', color:'#993556'}
 ];
 
-function matchExceptBranch(r) {
-  if (F.platform !== 'all' && r.pf !== F.platform) return false;
-  if (F.lang !== 'all' && r.lang !== F.lang) return false;
-  if (F.rating === 'none') { if (r.star !== null) return false; }
-  else if (F.rating === 'low') { if (r.star === null || r.star > 3) return false; }
-  else if (F.rating !== 'all') { if (r.star !== parseInt(F.rating, 10)) return false; }
-  if (F.from && r.date < F.from) return false;
-  if (F.to && r.date > F.to) return false;
-  if (F.q && !(r.body + ' ' + r.trans).toLowerCase().includes(F.q)) return false;
+const CF = {period:'all', from:'', to:''};
+
+function matchCompare(r) {
+  if (CF.from && r.date < CF.from) return false;
+  if (CF.to && r.date > CF.to) return false;
   return true;
 }
 
-function renderBranchCompare() {
-  const wrap = document.getElementById('cmp-wrap');
-  const have = BR.filter(b => ALL.some(r => r.branch === b.k));
-  destroyChart('brCount'); destroyChart('brRating');
-  if (have.length < 2) { wrap.classList.add('hidden'); return; }
-  wrap.classList.remove('hidden');
+function buildCompareFilters() {
+  const years = [...new Set(ALL.map(r => r.date.slice(0, 4)))].sort().reverse();
+  const el = document.getElementById('cmp-chips-period');
+  el.innerHTML =
+    '<button class="cchip" data-v="all">전체</button>' +
+    '<button class="cchip" data-v="d90">최근 90일</button>' +
+    years.map(y => `<button class="cchip" data-v="y${y}">${y}년</button>`).join('');
+  el.querySelectorAll('.cchip').forEach(b => { b.onclick = () => setCompareF(b.dataset.v); });
+  updateCompareChips();
+}
 
-  const base = ALL.filter(matchExceptBranch);
+function setCompareF(v) {
+  CF.period = v;
+  const today = new Date();
+  if (v === 'all') { CF.from = ''; CF.to = ''; }
+  else if (v === 'd90') { const d = new Date(today); d.setDate(d.getDate() - 90); CF.from = ymd(d); CF.to = ymd(today); }
+  else if (v[0] === 'y') { CF.from = v.slice(1) + '-01-01'; CF.to = v.slice(1) + '-12-31'; }
+  updateCompareChips();
+  renderBranchCompare();
+}
+
+function updateCompareChips() {
+  document.querySelectorAll('.cchip').forEach(b => b.classList.toggle('active', b.dataset.v === CF.period));
+}
+
+function renderBranchCompare() {
+  destroyChart('brCount'); destroyChart('brRating');
+  if (!document.getElementById('cmp-table')) return;
+
+  const base = ALL.filter(matchCompare);
   const stat = BR.map(b => {
     const rows = base.filter(r => r.branch === b.k);
     const g = rows.filter(r => r.pf === '구글');
@@ -846,19 +859,47 @@ function renderBranchCompare() {
   });
 }
 
-// ───── 탭 전환 (방문자 리뷰 / 블로그 리뷰) ─────
+// ───── 탭 전환 (홍대점 / 명동점 / 지점 비교 / 블로그 리뷰) ─────
+const TAB_BRANCH = {hongdae:'홍대', myeongdong:'명동'};
+let currentTab = 'hongdae';
+
 function switchTab(name) {
-  if (name === 'blog' && document.getElementById('tab-blog').style.display === 'none') name = 'visitor';
-  document.getElementById('pane-visitor').classList.toggle('hidden', name !== 'visitor');
+  const btn = document.getElementById('tab-' + name);
+  if (!btn || btn.style.display === 'none') name = 'hongdae';
+  currentTab = name;
+  const isBranch = name in TAB_BRANCH;
+  document.getElementById('pane-visitor').classList.toggle('hidden', !isBranch);
+  document.getElementById('pane-compare').classList.toggle('hidden', name !== 'compare');
   document.getElementById('pane-blog').classList.toggle('hidden', name !== 'blog');
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
-  try { history.replaceState(null, '', name === 'blog' ? '#blog' : location.pathname + location.search); } catch (e) {}
+  try { history.replaceState(null, '', name === 'hongdae' ? location.pathname + location.search : '#' + name); } catch (e) {}
+  if (isBranch) {
+    F.branch = TAB_BRANCH[name];
+    if (ALL.length) applyAndRender();
+  } else if (name === 'compare' && ALL.length) {
+    renderBranchCompare();
+  }
   window.dispatchEvent(new Event('resize'));
+}
+
+// 데이터에 없는 지점의 탭은 숨기고, 지점이 하나뿐이면 비교 탭도 숨긴다
+function updateTabVisibility() {
+  const has = k => ALL.some(r => r.branch === k);
+  document.getElementById('tab-hongdae').style.display = has('홍대') ? '' : 'none';
+  document.getElementById('tab-myeongdong').style.display = has('명동') ? '' : 'none';
+  document.getElementById('tab-compare').style.display = (has('홍대') && has('명동')) ? '' : 'none';
+  if (currentTab in TAB_BRANCH && !has(TAB_BRANCH[currentTab])) {
+    const first = has('홍대') ? 'hongdae' : (has('명동') ? 'myeongdong' : null);
+    if (first) switchTab(first);
+  }
 }
 
 loadData();
 loadBlog();
-if (location.hash === '#blog') switchTab('blog');
+{
+  const h = location.hash.replace('#', '');
+  if (['myeongdong', 'compare', 'blog'].includes(h)) switchTab(h);
+}
 </script>
 </body>
 </html>
