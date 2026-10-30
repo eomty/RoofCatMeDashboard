@@ -300,6 +300,8 @@
 
 <script>
 // 설문 스프레드시트의 '리뷰' 탭을 웹에 게시한 CSV 주소
+// 따중디엔핑은 시트의 '따중디엔핑' 탭에 따로 관리한다. 그 탭을 웹에 게시한 CSV 주소(gid=숫자)를 아래에 넣는다. 비워 두면 읽지 않는다.
+const DZ_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRixukIJsxMyHEGP6ilnKktBXmmMYfU0NUokXCOprjaFT452pMoJ7YpUTZQKbVOZgLlociJ2TJGkR62/pub?gid=580558305&single=true&output=csv';
 const REVIEW_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRixukIJsxMyHEGP6ilnKktBXmmMYfU0NUokXCOprjaFT452pMoJ7YpUTZQKbVOZgLlociJ2TJGkR62/pub?gid=1258732567&single=true&output=csv';
 
 const BRANCH_LABEL = {'홍대':'홍대점','명동':'명동점'};
@@ -348,14 +350,14 @@ function parseCSV(text) {
   return rows;
 }
 
-function toReviews(rows) {
+function toReviews(rows, defaultPf) {
   if (!rows.length) return [];
   const header = rows[0].map(h => h.replace(/[\s\u00A0\uFEFF]+/g, ''));
   const idx = {};
   header.forEach((h, i) => { idx[h] = i; });
   const get = (r, name) => (idx[name] === undefined ? '' : (r[idx[name]] || '')).trim();
   return rows.slice(1).map(r => {
-    const pfv = get(r, '플랫폼');
+    const pfv = get(r, '플랫폼') || defaultPf || '';
     // 따중디엔핑은 4.5처럼 소수 별점이 있어서 소수 그대로 보관하고, 필터·색은 정수 부분(4.5 → ★4)으로 쓴다
     const starRaw = parseFloat(get(r, '별점'));
     const star = pfv === '따중디엔핑' ? Math.floor(starRaw) : parseInt(get(r, '별점'), 10);
@@ -381,6 +383,13 @@ async function loadData() {
     const res = await fetch(REVIEW_CSV_URL + '&t=' + Date.now());
     if (!res.ok) throw new Error('HTTP ' + res.status);
     ALL = toReviews(parseCSV(await res.text()));
+    // 따중디엔핑 탭 (실패해도 구글·네이버 화면은 그대로 보여준다)
+    if (DZ_CSV_URL) {
+      try {
+        const rd = await fetch(DZ_CSV_URL + (DZ_CSV_URL.includes('?') ? '&' : '?') + 't=' + Date.now());
+        if (rd.ok) ALL = ALL.concat(toReviews(parseCSV(await rd.text()), '따중디엔핑')).sort((a, b) => b.date.localeCompare(a.date));
+      } catch (e) { /* 따중디엔핑 탭을 못 읽어도 나머지는 정상 표시 */ }
+    }
     document.getElementById('last-updated').textContent = '업데이트: ' + new Date().toLocaleString('ko-KR', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'});
     if (!ALL.length) throw new Error('empty');
     buildDynamicFilters();
