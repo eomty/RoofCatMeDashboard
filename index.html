@@ -1,63 +1,1205 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>팔로우 SBS | 고객 경험 관찰</title><style>
-:root{font-family:'Malgun Gothic','Apple SD Gothic Neo',system-ui,sans-serif;color:#1d2939;background:#f3f5f7}*{box-sizing:border-box}body{margin:0}button,input,select,textarea{font:inherit}button{cursor:pointer}header{background:#172a38;color:white;padding:18px 20px}header .wrap{max-width:1100px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px}h1{font-size:22px;margin:0}header small{color:#c4d4df}main{max-width:1100px;margin:20px auto;padding:0 14px 50px}.card{background:white;border:1px solid #dce2e7;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 1px 3px #1018280b}h2{font-size:19px;margin:0 0 15px}h3{font-size:16px;margin:18px 0 9px;color:#233b4c}.sub{font-size:13px;color:#64748b;margin:5px 0 16px}.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.field{display:flex;flex-direction:column;gap:5px;min-width:0}.field>span{font-size:13px;font-weight:700;color:#435466}input,select,textarea{width:100%;border:1px solid #cdd6df;border-radius:7px;padding:10px;background:white;color:#172a38}textarea{min-height:92px;resize:vertical;line-height:1.6}textarea.big{min-height:155px}input:focus,select:focus,textarea:focus{outline:2px solid #a8cbd7;border-color:#39748a}.btn{border:1px solid #c8d3dc;background:white;border-radius:8px;padding:9px 13px;color:#21394a;font-weight:700}.btn.primary{background:#12647a;color:white;border-color:#12647a}.btn.danger{color:#ad3232}.btn:disabled{opacity:.45;cursor:not-allowed}.btn.sm{font-size:12px;padding:6px 9px}.toolbar{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}.muted{color:#66788a}.pill{background:#eaf2f5;color:#185b6b;border-radius:20px;padding:4px 9px;font-size:12px}.stage{border:1px solid #d5e0e7;border-radius:10px;margin:12px 0;overflow:hidden}.stagehead{background:#f1f6f8;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:10px}.stagehead strong{font-size:16px}.stagebody{padding:16px}.stage.collapsed .stagebody{display:none}.notegrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.hint{background:#f6f8f9;border-left:3px solid #6b94a3;padding:11px 13px;margin:12px 0;font-size:13px;line-height:1.7}.checkrow{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0}.checkrow label{display:flex;align-items:center;gap:5px;font-size:14px}.checkrow input{width:auto}.divider{border-top:1px solid #e5e9ee;margin:18px 0}.save{font-size:12px;color:#c8e1e9}.stats{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0}.stats span{background:#edf3f5;border-radius:7px;padding:8px 12px;font-size:13px}details summary{cursor:pointer;font-weight:700}.printonly{display:none}.warning{background:#fff8e6;border:1px solid #ead9a7;padding:11px;border-radius:7px;font-size:13px;line-height:1.7;margin:12px 0}.recordlist{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.recordlist select{flex:1;min-width:220px}.help{font-size:12px;color:#64748b}.report-section{margin:14px 0}.report-section h3{border-bottom:1px solid #ddd;padding-bottom:5px}.report-field{white-space:pre-wrap;line-height:1.65;margin:6px 0 13px}.report-label{font-size:12px;font-weight:bold;color:#536579}#printReport{display:none}@media(max-width:740px){.grid,.notegrid{grid-template-columns:1fr}header .wrap{align-items:flex-start;flex-direction:column}.card{padding:15px}.stagehead{align-items:flex-start;flex-direction:column}.toolbar .btn{flex:1}.stagebody{padding:12px}}@media print{@page{size:A4;margin:14mm}body{background:white;color:black;font-size:10pt}header,main,#app{display:none!important}#printReport{display:block!important}#printReport h1{font-size:20pt;border-bottom:2px solid #333;padding-bottom:10px}#printReport h2{font-size:14pt;margin-top:20px;border-bottom:1px solid #aaa;padding-bottom:6px}#printReport h3{font-size:11pt}#printReport .report-section{break-inside:auto;page-break-inside:auto}#printReport .report-field{overflow-wrap:anywhere;white-space:pre-wrap;break-inside:auto;page-break-inside:auto}#printReport .report-label{color:#444}#printReport .report-section h2,#printReport .report-section h3{break-after:avoid}#printReport .report-section{margin:12px 0}#printReport .report-field{margin:3px 0 10px}}
-</style></head><body><header><div class="wrap"><div><h1>팔로우 SBS</h1><small>고객 경험 관찰 노트 · 루프캣미</small></div><div class="row"><span id="saveStatus" class="save">자동 저장 준비</span><span class="pill">오프라인 사용 가능</span></div></div></header><main id="app"><section class="card"><h2>관찰 기록 관리</h2><div class="recordlist"><select id="recordSelect" aria-label="관찰 기록 선택"></select><button class="btn primary" id="newRecord">+ 새 관찰</button><button class="btn danger" id="deleteRecord">현재 기록 삭제</button></div><div class="toolbar" style="margin-top:13px"><button class="btn primary" id="submitBtn">시트로 제출</button><button class="btn" id="exportOne">현재 JSON 내보내기</button><button class="btn" id="exportAll">전체 JSON 내보내기</button><button class="btn" id="importBtn">JSON 가져오기</button><input type="file" id="importFile" accept=".json,application/json" hidden><button class="btn primary" id="printBtn">PDF 저장 / A4 인쇄</button></div><div class="warning">작성 중인 기록은 이 브라우저에 임시 저장됩니다. <b>관찰이 끝나면 '시트로 제출'을 눌러 주세요</b> (제출해야 취합·월간 통계에 반영됩니다). 다른 기기와 자동 동기화되지 않으며 브라우저 데이터 삭제 시 사라질 수 있습니다. <b>정기적으로 '전체 JSON 내보내기'로 백업하세요.</b> PDF 저장은 브라우저의 인쇄 화면에서 'PDF로 저장'을 선택합니다. 고객의 실명·연락처·얼굴 사진 등 개인정보는 기록하지 마세요.</div></section>
-<section class="card"><h2>1. 기본 정보</h2><div class="grid" id="basicFields"></div><div class="stats" id="durationStats"></div><div class="hint">관찰범위 : <b>부점장은 입장부터 퇴장까지 전체</b><br><b>운영포지션은 마을 입장부터 마을 퇴장까지</b><br>고객의 자연스러운 행동을 관찰하시고, 작성하여 주세요.<br><b>운영포지션은 포지션 업무가 더 우선이므로 중간에 누락되어도 괜찮습니다.</b></div></section>
-<section class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">2. 루프캣미 파크에서의 경험</h2><button class="btn primary" id="addStage">+ 단계 추가</button></div><p class="sub">단계 추가, 순서 이동, 삭제 가능. 모든 입력은 선택 사항입니다. 각 단계의 질문은 관찰 참고용이며 자유 노트 중심으로 작성하세요.</p><div id="stages"></div></section>
-<section class="card"><h2>3. 마무리 · 종합 관찰 및 개선 의견</h2><p class="sub">관찰 종료 후 작성하거나 관찰 중에도 자유롭게 수정할 수 있습니다.</p><div class="notegrid" id="summaryFields"></div></section><section class="card"><h2>4. 기록 활용 안내</h2><p class="sub">JSON은 관찰 기록별 고유 ID, 단계 순서, 타임스탬프와 함께 저장됩니다. 실제 관찰 행동(observedBehavior), 고객 직접 발언(customerQuotes), 관찰자의 해석(observerInterpretation), 개선 제안(improvementIdeas)을 분리해 향후 AI 분석에 활용할 수 있습니다.</p><div class="row"><button class="btn" id="expandAll">모든 단계 펼치기</button><button class="btn" id="collapseAll">모든 단계 접기</button></div></section></main><div id="printReport"></div>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>루프캣미 홍대점 · 유입경로 대시보드</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --blue-dark:#0C447C;--blue-mid:#185FA5;--blue-light:#378ADD;--blue-pale:#E6F1FB;
+    --green-dark:#27500A;--green-pale:#EAF3DE;
+    --gray-900:#1a1a18;--gray-700:#444441;--gray-500:#888780;--gray-300:#d3d1c7;--gray-100:#f1efe8;
+    --white:#ffffff;--border:rgba(0,0,0,0.08);
+    --radius-sm:6px;--radius-md:10px;--radius-lg:14px;
+    --nav-h:54px;--sidebar-w:220px;
+  }
+  body{font-family:'Noto Sans KR',sans-serif;background:var(--gray-100);color:var(--gray-900);font-size:14px;min-height:100vh}
+  nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;z-index:100}
+  .nav-logo{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--gray-900);text-decoration:none}
+  .nav-dot{width:8px;height:8px;background:var(--blue-mid);border-radius:50%;flex-shrink:0}
+  .nav-divider{width:1px;height:18px;background:var(--border)}
+  .branch-switch{display:flex;gap:3px;background:var(--gray-100);padding:3px;border-radius:8px}
+  .branch-btn{padding:5px 12px;border-radius:6px;font-size:12px;border:none;background:transparent;color:var(--gray-500);cursor:pointer;font-family:inherit;transition:all .15s}
+  .branch-btn:hover{color:var(--gray-900)}
+  .branch-btn.active{background:var(--white);color:var(--blue-dark);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+  .nav-tabs{display:flex;gap:4px}
+  .nav-tab{padding:5px 14px;border-radius:var(--radius-sm);font-size:13px;border:none;background:transparent;color:var(--gray-500);cursor:pointer;font-family:inherit;transition:all .15s}
+  .nav-tab:hover{background:var(--gray-100);color:var(--gray-900)}
+  .nav-tab.active{background:var(--blue-pale);color:var(--blue-dark);font-weight:500}
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .last-updated{font-size:11px;color:var(--gray-500)}
+  .refresh-btn{padding:6px 14px;border-radius:var(--radius-sm);background:var(--blue-mid);color:white;border:none;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s}
+  .refresh-btn:hover{background:var(--blue-dark)}
+  .layout{display:flex;padding-top:var(--nav-h);min-height:100vh}
+  .sidebar{width:var(--sidebar-w);flex-shrink:0;position:fixed;top:var(--nav-h);bottom:0;left:0;background:var(--white);border-right:1px solid var(--border);overflow-y:auto;padding:16px 12px}
+  .sidebar-label{font-size:10px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.06em;padding:0 8px;margin:16px 0 6px;display:block}
+  .sidebar-label:first-child{margin-top:0}
+  .month-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;color:var(--gray-500);transition:all .15s;margin-bottom:2px;border:none;background:transparent;width:100%;text-align:left;font-family:inherit}
+  .month-item:hover{background:var(--gray-100);color:var(--gray-900)}
+  .month-item.has-data{color:var(--gray-900)}
+  .month-item.active{background:var(--blue-pale);color:var(--blue-dark);font-weight:500}
+  .month-badge{font-size:10px;padding:1px 6px;border-radius:10px;background:var(--green-pale);color:var(--green-dark)}
+  .month-item.active .month-badge{background:var(--blue-mid);color:white}
+  .main-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-weight:500;color:var(--gray-900);transition:all .15s;margin-bottom:4px;border:none;background:transparent;width:100%;text-align:left;font-family:inherit}
+  .main-item:hover{background:var(--gray-100)}
+  .main-item.active{background:var(--blue-pale);color:var(--blue-dark)}
+  .content{margin-left:var(--sidebar-w);flex:1;padding:28px;min-width:0}
+  .page-header{margin-bottom:24px}
+  .page-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 10px;border-radius:20px;margin-bottom:8px}
+  .page-badge.annual{background:var(--blue-pale);color:var(--blue-dark)}
+  .page-badge.monthly{background:var(--green-pale);color:var(--green-dark)}
+  .page-title{font-size:22px;font-weight:600;margin-bottom:4px}
+  .page-sub{font-size:13px;color:var(--gray-500)}
+  .month-nav{display:flex;align-items:center;gap:8px;margin-top:12px}
+  .month-nav-btn{padding:4px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:white;font-size:12px;cursor:pointer;font-family:inherit;color:var(--gray-700);transition:all .15s}
+  .month-nav-btn:hover:not(:disabled){background:var(--gray-100)}
+  .month-nav-btn:disabled{opacity:.35;cursor:default}
+  .month-nav-current{font-size:14px;font-weight:500}
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+  .metric-card{background:var(--white);border-radius:var(--radius-md);border:1px solid var(--border);padding:16px 18px}
+  .metric-label{font-size:11px;color:var(--gray-500);margin-bottom:4px}
+  .metric-value{font-size:24px;font-weight:600;line-height:1.1;margin-bottom:2px}
+  .metric-note{font-size:11px;color:var(--gray-500)}
+  .metric-up{color:#3B6D11;font-size:11px}
+  .metric-down{color:#E24B4A;font-size:11px}
+  .grid{display:grid;gap:16px;margin-bottom:16px}
+  .grid-2{grid-template-columns:1fr 1fr}
+  .span-2{grid-column:span 2}
+  .card{background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--border);padding:20px 22px}
+  .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .card-title{font-size:12px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em}
+  .tab-group{display:flex;gap:3px}
+  .tab-btn{padding:4px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;font-size:12px;cursor:pointer;font-family:inherit;color:var(--gray-500);transition:all .15s}
+  .tab-btn:hover{background:var(--gray-100)}
+  .tab-btn.active{background:var(--blue-pale);color:var(--blue-dark);border-color:transparent;font-weight:500}
+  .bar-list{display:flex;flex-direction:column;gap:8px}
+  .bar-row{display:flex;align-items:center;gap:10px}
+  .bar-rank{font-size:10px;color:var(--gray-500);width:14px;text-align:right;flex-shrink:0}
+  .bar-label{font-size:12px;color:var(--gray-900);width:82px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar-track{flex:1;height:7px;background:var(--gray-100);border-radius:4px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+  .bar-pct{font-size:12px;color:var(--gray-500);width:38px;text-align:right;flex-shrink:0}
+  .bar-cnt{font-size:11px;color:var(--gray-300);width:32px;text-align:right;flex-shrink:0}
+  .nat-list{display:flex;flex-direction:column}
+  .nat-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--gray-100);font-size:12px}
+  .nat-row:last-child{border-bottom:none}
+  .nat-val{color:var(--gray-500)}
+  .type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .type-card{background:var(--gray-100);border-radius:var(--radius-sm);padding:12px 14px}
+  .type-name{font-size:14px;font-weight:500;margin-bottom:2px}
+  .type-pct{font-size:12px;color:var(--gray-500);margin-bottom:6px}
+  .type-top{font-size:11px;color:var(--gray-500);line-height:1.5}
+  .time-chart{display:flex;align-items:flex-end;gap:4px;height:100px}
+  .time-col{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1}
+  .time-bar-wrap{display:flex;align-items:flex-end;gap:1px;width:100%;justify-content:center}
+  .time-lbl{font-size:9px;color:var(--gray-500);text-align:center;line-height:1.3}
+  .time-peak{color:#BA7517;font-weight:600}
+  .time-legend{display:flex;gap:12px;margin-bottom:8px}
+  .legend-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--gray-500)}
+  .legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+  .insight-list{display:flex;flex-direction:column}
+  .insight-row{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--gray-100);font-size:12px;line-height:1.6;align-items:flex-start}
+  .insight-row:last-child{border-bottom:none}
+  .insight-dot{width:6px;height:6px;border-radius:50%;background:var(--blue-mid);margin-top:5px;flex-shrink:0}
+  .month-calendar{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+  .cal-month{border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 6px;text-align:center;cursor:pointer;transition:all .15s;background:var(--white)}
+  .cal-month:hover.has-data{border-color:var(--blue-light)}
+  .cal-month.has-data{border-color:var(--blue-light);background:var(--blue-pale);cursor:pointer}
+  .cal-month.no-data{cursor:default;opacity:.4}
+  .cal-month-name{font-size:12px;font-weight:500;color:var(--blue-dark)}
+  .cal-month.no-data .cal-month-name{color:var(--gray-500)}
+  .cal-count{font-size:10px;color:var(--blue-mid);margin-top:2px}
+  .loading{display:flex;align-items:center;justify-content:center;height:300px;flex-direction:column;gap:12px;color:var(--gray-500)}
+  .spinner{width:28px;height:28px;border:3px solid var(--gray-300);border-top-color:var(--blue-mid);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media(max-width:900px){.sidebar{display:none}.content{margin-left:0;padding:16px}.grid-2{grid-template-columns:1fr}.span-2{grid-column:span 1}.metrics{grid-template-columns:repeat(2,1fr)}.nav-tabs{display:none}}
+  @media(max-width:480px){.metrics{grid-template-columns:1fr 1fr}.month-calendar{grid-template-columns:repeat(4,1fr)}}
+  .hidden{display:none!important}
+  .more-btn{font-size:11px;padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--gray-500);cursor:pointer;font-family:inherit;transition:all .15s}
+  .more-btn:hover{background:var(--gray-100);color:var(--gray-900)}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+  .modal-overlay.hidden{display:none!important}
+  .modal{background:var(--white);border-radius:var(--radius-lg);width:100%;max-width:520px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+  .modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);flex-shrink:0}
+  .modal-title{font-size:15px;font-weight:600;color:var(--gray-900)}
+  .modal-close{width:28px;height:28px;border-radius:50%;border:none;background:var(--gray-100);color:var(--gray-700);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .15s}
+  .modal-close:hover{background:var(--gray-300)}
+  .modal-body{overflow-y:auto;padding:16px 22px;flex:1}
+  .modal-sub{font-size:11px;color:var(--gray-500);margin-bottom:14px}
+  .memo-filter{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px}
+  .memo-filter-btn{font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--gray-500);cursor:pointer;font-family:inherit;transition:all .15s}
+  .memo-filter-btn:hover{background:var(--gray-100)}
+  .memo-filter-btn.active{background:var(--blue-pale);color:var(--blue-dark);border-color:transparent;font-weight:500}
+  .memo-feed{display:flex;flex-direction:column;gap:8px}
+  .memo-item{background:var(--gray-100);border-radius:var(--radius-md);padding:12px 14px;border-left:3px solid var(--border)}
+  .memo-item.cat-workin{border-left-color:#185FA5}
+  .memo-item.cat-new{border-left-color:#0F6E56}
+  .memo-item.cat-viral{border-left-color:#993556}
+  .memo-item.cat-return{border-left-color:#BA7517}
+  .memo-item.cat-myeongdong{border-left-color:#888780}
+  .memo-item.cat-etc{border-left-color:#d3d1c7}
+  .memo-top{display:flex;align-items:center;gap:6px;margin-bottom:5px;flex-wrap:wrap}
+  .memo-cat-badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500}
+  .memo-cat-badge.cat-workin{background:#E6F1FB;color:#0C447C}
+  .memo-cat-badge.cat-new{background:#EAF3DE;color:#27500A}
+  .memo-cat-badge.cat-viral{background:#FDEEF3;color:#7A1F3D}
+  .memo-cat-badge.cat-return{background:#FAEEDA;color:#7A4A00}
+  .memo-cat-badge.cat-myeongdong{background:#f0efe8;color:#555}
+  .memo-cat-badge.cat-etc{background:#f0efe8;color:#555}
+  .memo-date{font-size:10px;color:var(--gray-500)}
+  .memo-meta{font-size:10px;color:var(--gray-500)}
+  .memo-text{font-size:13px;color:var(--gray-900);line-height:1.5}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo"><div class="nav-dot"></div><span id="nav-branch-name">루프캣미 홍대점</span></div>
+  <div class="nav-divider"></div>
+  <div class="branch-switch" id="branch-switch">
+    <button class="branch-btn active" data-branch="hongdae" onclick="switchBranch('hongdae')">홍대점</button>
+    <button class="branch-btn" data-branch="myeongdong" onclick="switchBranch('myeongdong')">명동점</button>
+    <button class="branch-btn" data-branch="compare" onclick="switchBranch('compare')">통합 비교</button>
+  </div>
+  <div class="nav-divider"></div>
+  <div class="nav-tabs" id="nav-tabs">
+    <button class="nav-tab active" onclick="goAnnual()">연간 누계</button>
+    <button class="nav-tab" onclick="goMonthly()">월별 상세</button>
+  </div>
+  <div class="nav-right">
+    <a href="reviews.html" class="refresh-btn" style="text-decoration:none">★ 리뷰</a>
+    <a href="sbs.html" class="refresh-btn" style="text-decoration:none">SBS</a>
+    <span class="last-updated" id="last-updated"></span>
+    <button class="refresh-btn" onclick="loadData()">↻ 새로고침</button>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <button class="main-item active" id="sidebar-annual" onclick="goAnnual()">📊 연간 누계</button>
+    <span class="sidebar-label">월별 상세</span>
+    <div id="sidebar-months"></div>
+  </aside>
+  <main class="content" id="main-content">
+    <div id="page-annual"><div class="loading"><div class="spinner"></div>데이터 불러오는 중...</div></div>
+    <div id="page-monthly" class="hidden"></div>
+    <div id="page-compare" class="hidden"></div>
+  </main>
+</div>
+
+<div class="modal-overlay hidden" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title"></span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-sub" id="modal-sub"></p>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+</div>
+
 <script>
-'use strict';
-const KEY='followSBS_records_v1',VERSION='1.0';
-// 구글 Apps Script 웹앱 URL을 여기에 붙여넣으세요 (sbs_apps_script.gs 배포 후 발급되는 주소)
-const SHEET_URL='https://script.google.com/macros/s/AKfycbyv75BB1sCoTINGozM8xEPc-9t4GVuvxRsgbJh3Yj_l-k-vJH84rOzmSeOWCdxWAp0qiw/exec';
-const templates=[
-['입구',[]],
-['마을 입장',['고객이 가장 오래 머무르는 공간은?','이동 동선에 다른 고객이나, 시설물 방해가 되는 것이 있는가?']],
-['고양이 교감',['고객이 가장 먼저 관심을 보이는 고양이와 그 이유라고 생각되는 것은?','집사가 고객에게 다가가 고양이 이름을 알려주는가?']],
-['드링크 바 이용',['드링크 바 이용 시, 어려움은 없어 보이는지? (두리번거리진 않는지)']],
-['방탈출 프로그램 (홍대)',['(홍대) 방탈출 프로그램에 참여하였는가?','방탈출 프로그램을 끝까지 완성하였는가?','별도의 설명 없이 참여 방법을 이해하는가?','프로그램을 사진과 영상으로 남기는가?']],
-['데일리 프로그램',['고객이 참여한 시간별 프로그램은?','프로그램을 사진과 영상으로 남기는가?']],
-['퇴장',['퇴장 전 마지막으로 하는 행동은?','퇴장과정에서 기다리거나 혼란스러워 하는가? (입구를 못 찾는 등)','상품샵을 들러보았는가?','집사가 “야옹” 인사를 하였는가?']]
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRixukIJsxMyHEGP6ilnKktBXmmMYfU0NUokXCOprjaFT452pMoJ7YpUTZQKbVOZgLlociJ2TJGkR62/pub?gid=1811913983&single=true&output=csv';
+const MONTHS_KR = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+const CH_COLORS = {
+  '네이버 검색':'#185FA5','네이버 지도':'#185FA5','재방문':'#185FA5','워크인':'#185FA5',
+  '인스타(타인)':'#993556','인스타(공식)':'#993556','틱톡':'#0F6E56','샤오홍슈':'#0F6E56',
+  '구글 검색':'#888780','구글 지도':'#888780','지인 추천':'#888780','온라인 예매':'#888780',
+  '카카오맵':'#B8860B','AI':'#6366F1','인터넷':'#64748B','유튜브':'#D62E2E','다른 지점':'#0D9488',
+  '기타':'#C4C2BA'
+};
+const TIME_HOURS = ['12시','13시','14시','15시','16시','17시','18시','19시','20시'];
+
+const SHEET_URLS = {
+  hongdae: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRixukIJsxMyHEGP6ilnKktBXmmMYfU0NUokXCOprjaFT452pMoJ7YpUTZQKbVOZgLlociJ2TJGkR62/pub?gid=1811913983&single=true&output=csv',
+  myeongdong: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRixukIJsxMyHEGP6ilnKktBXmmMYfU0NUokXCOprjaFT452pMoJ7YpUTZQKbVOZgLlociJ2TJGkR62/pub?gid=1008479392&single=true&output=csv'
+};
+const BRANCH_NAMES = {hongdae:'루프캣미 홍대점', myeongdong:'루프캣미 명동점'};
+
+let currentBranch = 'hongdae';
+let DATA_STORE = { hongdae:{raw:[],monthly:{}}, myeongdong:{raw:[],monthly:{}} };
+let currentMonth = null;
+let currentChTab = {annual:'all', monthly:'all'};
+let currentTypeTab = {annual:'all', monthly:'all'};
+let chartInstances = {};
+let loadedBranches = new Set();
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const header = parseCSVLine(lines[0]);
+
+  return lines.slice(1).map(line => {
+    const cols = parseCSVLine(line);
+    const obj = {};
+    header.forEach((h,i) => {
+      let key = h.trim();
+      // 모든 공백(일반/줄바꿈/non-breaking 등) 제거 후 비교 — 표기 차이를 흡수
+      const noSpace = key.replace(/[\s\u00A0\uFEFF]+/g, '');
+      if (noSpace === '그룹유형' || noSpace === '유형') key = '그룹유형';
+      else if (noSpace === '국가지역' || noSpace === '국가/지역') key = '국가/지역';
+      else if (noSpace === '날짜') key = '날짜';
+      else if (noSpace === '시간') key = '시간';
+      else if (noSpace === '구분') key = '구분';
+      else if (noSpace === '채널') key = '채널';
+      else if (noSpace === '메모') key = '메모';
+      obj[key] = (cols[i]||'').trim();
+    });
+    return obj;
+  }).filter(r => r['날짜'] && (r['채널'] || r['그룹유형']));
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let cur = '', inQuote = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuote && line[i+1] === '"') { cur += '"'; i++; }
+      else inQuote = !inQuote;
+    } else if (ch === ',' && !inQuote) {
+      result.push(cur); cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  result.push(cur);
+  return result;
+}
+
+function buildMonthly(rows) {
+  const m = {};
+  rows.forEach(r => {
+    const date = r['날짜'];
+    if (!date || !date.match(/\d{4}-\d{2}-\d{2}/)) return;
+    const month = parseInt(date.split('-')[1]);
+    const year = parseInt(date.split('-')[0]);
+    const key = `${year}-${month}`;
+    if (!m[key]) m[key] = {year, month, rows:[]};
+    m[key].rows.push(r);
+  });
+  return m;
+}
+
+function calcStats(rows) {
+  const total = rows.length;
+  const domestic = rows.filter(r=>r['구분']==='국내').length;
+  const foreign = rows.filter(r=>r['구분']==='국외').length;
+
+  const chAll = {}, chDom = {}, chFor = {};
+  rows.forEach(r => {
+    const ch = r['채널']; const g = r['구분'];
+    chAll[ch] = (chAll[ch]||0)+1;
+    if(g==='국내') chDom[ch]=(chDom[ch]||0)+1;
+    if(g==='국외') chFor[ch]=(chFor[ch]||0)+1;
+  });
+
+  const toArr = (obj,tot) => Object.entries(obj).map(([name,cnt])=>({name,cnt,pct:+(cnt/tot*100).toFixed(1),color:CH_COLORS[name]||'#C4C2BA'})).sort((a,b)=>b.cnt-a.cnt);
+  const domTotal = Object.values(chDom).reduce((s,v)=>s+v,0)||1;
+  const forTotal = Object.values(chFor).reduce((s,v)=>s+v,0)||1;
+
+  const nat = {};
+  rows.forEach(r=>{ const n=r['국가/지역']||'미응답'; nat[n]=(nat[n]||0)+1; });
+  const natArr = Object.entries(nat).map(([name,cnt])=>({name,cnt,pct:+(cnt/total*100).toFixed(1)})).sort((a,b)=>b.cnt-a.cnt);
+
+  const types = {all:{커플:0,가족:0,친구:0,'1인':0}, dom:{커플:0,가족:0,친구:0,'1인':0}, for:{커플:0,가족:0,친구:0,'1인':0}};
+  const typeCh = {all:{}, dom:{}, for:{}};
+  rows.forEach(r => {
+    const t = r['그룹유형']; const g = r['구분']; const ch = r['채널'];
+    if(!['커플','가족','친구','1인'].includes(t)) return;
+    types.all[t]=(types.all[t]||0)+1;
+    if(!typeCh.all[t]) typeCh.all[t]={};
+    typeCh.all[t][ch]=(typeCh.all[t][ch]||0)+1;
+    if(g==='국내'){
+      types.dom[t]=(types.dom[t]||0)+1;
+      if(!typeCh.dom[t]) typeCh.dom[t]={};
+      typeCh.dom[t][ch]=(typeCh.dom[t][ch]||0)+1;
+    }
+    if(g==='국외'){
+      types.for[t]=(types.for[t]||0)+1;
+      if(!typeCh.for[t]) typeCh.for[t]={};
+      typeCh.for[t][ch]=(typeCh.for[t][ch]||0)+1;
+    }
+  });
+
+  const mkTypeArr = (tObj, tcObj, tot) => Object.entries(tObj).map(([name,cnt])=>{
+    const top3 = Object.entries(tcObj[name]||{}).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([c,n])=>`${c}(${n})`).join(', ');
+    return {name,cnt,pct:+(cnt/tot*100).toFixed(1),top3};
+  }).sort((a,b)=>b.cnt-a.cnt).filter(t=>t.cnt>0);
+
+  const typeTotal = Object.values(types.all).reduce((s,v)=>s+v,0)||1;
+  const domTypeTotal = Object.values(types.dom).reduce((s,v)=>s+v,0)||1;
+  const forTypeTotal = Object.values(types.for).reduce((s,v)=>s+v,0)||1;
+
+  // 시간대
+  const timeData = {};
+  rows.forEach(r=>{
+    const t = r['시간'];
+    if(!t || !t.match(/\d{2}:\d{2}/)) return;
+    const h = parseInt(t.split(':')[0]);
+    if(h<12||h>20) return;
+    const key = h+'시';
+    if(!timeData[key]) timeData[key]={tot:0,dom:0,for:0};
+    timeData[key].tot++;
+    if(r['구분']==='국내') timeData[key].dom++;
+    if(r['구분']==='국외') timeData[key].for++;
+  });
+  const hasTime = Object.keys(timeData).length > 0;
+  const timeArr = TIME_HOURS.map(h=>({h, ...(timeData[h]||{tot:0,dom:0,for:0})}));
+
+  const top1 = toArr(chAll, total)[0] || {name:'-',pct:0};
+
+  return {
+    total, domestic, foreign,
+    top1_ch: top1.name, top1_pct: top1.pct,
+    ch_all: toArr(chAll, total),
+    ch_dom: toArr(chDom, domTotal),
+    ch_for: toArr(chFor, forTotal),
+    nat: natArr,
+    types_all: mkTypeArr(types.all, typeCh.all, typeTotal),
+    types_dom: mkTypeArr(types.dom, typeCh.dom, domTypeTotal),
+    types_for: mkTypeArr(types.for, typeCh.for, forTypeTotal),
+    hasTime, timeArr
+  };
+}
+
+function getMonthly() { return DATA_STORE[currentBranch].monthly; }
+function getRaw() { return DATA_STORE[currentBranch].raw; }
+
+async function fetchBranch(branch) {
+  const res = await fetch(SHEET_URLS[branch] + '&t=' + Date.now());
+  const text = await res.text();
+  const raw = parseCSV(text);
+  DATA_STORE[branch] = { raw, monthly: buildMonthly(raw) };
+  loadedBranches.add(branch);
+}
+
+async function loadData() {
+  if (currentBranch === 'compare') {
+    document.getElementById('page-compare').innerHTML = '<div class="loading"><div class="spinner"></div>두 지점 데이터 불러오는 중...</div>';
+    try {
+      await Promise.all([fetchBranch('hongdae'), fetchBranch('myeongdong')]);
+      document.getElementById('last-updated').textContent = '업데이트: ' + new Date().toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      buildSidebar();
+      showComparePage(compareSubPage, compareMonth);
+    } catch(e) {
+      document.getElementById('page-compare').innerHTML = '<div class="loading">데이터를 불러올 수 없습니다. 잠시 후 새로고침해 주세요.</div>';
+    }
+    return;
+  }
+
+  document.getElementById('page-annual').innerHTML = '<div class="loading"><div class="spinner"></div>최신 데이터 불러오는 중...</div>';
+  try {
+    await fetchBranch(currentBranch);
+    document.getElementById('last-updated').textContent = '업데이트: ' + new Date().toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    buildSidebar();
+    if (currentMonth) showPage('monthly', currentMonth);
+    else renderAnnualPage();
+  } catch(e) {
+    document.getElementById('page-annual').innerHTML = '<div class="loading">데이터를 불러올 수 없습니다. 잠시 후 새로고침해 주세요.</div>';
+  }
+}
+
+let compareMonth = null;
+let compareSubPage = 'annual';
+
+function switchBranch(branch) {
+  currentBranch = branch;
+  document.querySelectorAll('.branch-btn').forEach(b => b.classList.toggle('active', b.dataset.branch===branch));
+
+  const isCompare = branch === 'compare';
+  document.getElementById('page-annual').classList.toggle('hidden', isCompare);
+  document.getElementById('page-monthly').classList.add('hidden');
+  document.getElementById('page-compare').classList.toggle('hidden', !isCompare);
+
+  if (isCompare) {
+    document.getElementById('nav-branch-name').textContent = '홍대점 · 명동점 통합';
+  } else {
+    document.getElementById('nav-branch-name').textContent = BRANCH_NAMES[branch];
+    currentMonth = null;
+  }
+
+  if (isCompare) {
+    if (loadedBranches.has('hongdae') && loadedBranches.has('myeongdong')) showComparePage(compareSubPage, compareMonth);
+    else loadData();
+  } else {
+    if (loadedBranches.has(branch)) { buildSidebar(); renderAnnualPage(); }
+    else loadData();
+  }
+}
+
+function showComparePage(subPage, month) {
+  compareSubPage = subPage;
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>t.classList.toggle('active', i===(subPage==='annual'?0:1)));
+  document.querySelectorAll('.main-item').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.month-item').forEach(t=>t.classList.remove('active'));
+
+  if (subPage === 'annual') {
+    document.getElementById('sidebar-annual').classList.add('active');
+    compareMonth = null;
+    renderComparePage();
+  } else {
+    const allKeys = [...new Set([...Object.keys(DATA_STORE.hongdae.monthly), ...Object.keys(DATA_STORE.myeongdong.monthly)])].sort();
+    const m = month || (allKeys.length ? parseInt(allKeys[allKeys.length-1].split('-')[1]) : null);
+    compareMonth = m;
+    document.querySelectorAll('.month-item').forEach((el,i)=>{ if(i===m-1) el.classList.add('active'); });
+    renderCompareMonthlyPage(m);
+  }
+}
+
+function goAnnual() {
+  if (currentBranch === 'compare') showComparePage('annual');
+  else showPage('annual');
+}
+function goMonthly(month) {
+  if (currentBranch === 'compare') showComparePage('monthly', month);
+  else showPage('monthly', month);
+}
+
+function buildSidebar() {
+  if (currentBranch === 'compare') {
+    const allKeys = [...new Set([...Object.keys(DATA_STORE.hongdae.monthly), ...Object.keys(DATA_STORE.myeongdong.monthly)])];
+    const el = document.getElementById('sidebar-months');
+    el.innerHTML = MONTHS_KR.map((name,i) => {
+      const m = i+1;
+      const key = `2026-${m}`;
+      const has = allKeys.includes(key);
+      const hCnt = DATA_STORE.hongdae.monthly[key]?.rows.length || 0;
+      const mCnt = DATA_STORE.myeongdong.monthly[key]?.rows.length || 0;
+      return `<button class="month-item ${has?'has-data':''} ${compareMonth===m?'active':''}" onclick="${has?`goMonthly(${m})`:''}">
+        ${name} ${has?`<span class="month-badge">${hCnt+mCnt}건</span>`:''}
+      </button>`;
+    }).join('');
+    return;
+  }
+  const monthly = getMonthly();
+  const el = document.getElementById('sidebar-months');
+  el.innerHTML = MONTHS_KR.map((name,i) => {
+    const m = i+1;
+    const key = `2026-${m}`;
+    const has = monthly[key];
+    return `<button class="month-item ${has?'has-data':''} ${currentMonth===m?'active':''}" onclick="${has?`goMonthly(${m})`:''}">
+      ${name} ${has?`<span class="month-badge">${monthly[key].rows.length}건</span>`:''}
+    </button>`;
+  }).join('');
+}
+
+function showPage(page, month) {
+  document.getElementById('page-annual').classList.toggle('hidden', page!=='annual');
+  document.getElementById('page-monthly').classList.toggle('hidden', page!=='monthly');
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>t.classList.toggle('active',i===(page==='annual'?0:1)));
+  document.querySelectorAll('.main-item').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.month-item').forEach(t=>t.classList.remove('active'));
+
+  if (page==='annual') {
+    document.getElementById('sidebar-annual').classList.add('active');
+    currentMonth = null;
+    renderAnnualPage();
+  } else {
+    const m = month || Math.max(...Object.keys(getMonthly()).map(k=>parseInt(k.split('-')[1])));
+    currentMonth = m;
+    document.querySelectorAll('.month-item').forEach((el,i)=>{ if(i===m-1) el.classList.add('active'); });
+    renderMonthlyPage(m);
+  }
+  buildSidebar();
+}
+
+function renderBars(id, chArr, tab, stats) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  const list = (tab==='dom'?stats.ch_dom:tab==='for'?stats.ch_for:stats.ch_all).slice(0,10);
+  const max = Math.max(...list.map(d=>d.pct));
+  el.innerHTML = list.map((d,i)=>`
+    <div class="bar-row">
+      <span class="bar-rank">${i+1}</span>
+      <span class="bar-label" title="${d.name}">${d.name}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${(d.pct/max*100).toFixed(1)}%;background:${d.color||'#888780'}"></div></div>
+      <span class="bar-pct">${d.pct}%</span>
+      <span class="bar-cnt">${d.cnt}건</span>
+    </div>`).join('');
+}
+
+function renderNat(id, natArr, limit=8) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.innerHTML = natArr.slice(0,limit).map(n=>`
+    <div class="nat-row"><span>${n.name}</span><span class="nat-val">${n.cnt}팀 · ${n.pct}%</span></div>`).join('');
+}
+
+function renderTypes(id, stats, tab) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  const list = tab==='dom'?stats.types_dom:tab==='for'?stats.types_for:stats.types_all;
+  el.innerHTML = list.map(t=>`
+    <div class="type-card">
+      <div class="type-name">${t.name}</div>
+      <div class="type-pct">${t.cnt}팀 · ${t.pct}%</div>
+      <div class="type-top">TOP3: ${t.top3||'-'}</div>
+    </div>`).join('');
+}
+
+function renderTime(id, timeArr) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  const max = Math.max(...timeArr.map(t=>t.tot),1);
+  el.innerHTML = timeArr.map(t=>{
+    const isPeak = t.tot===Math.max(...timeArr.map(x=>x.tot));
+    const dH = Math.round(t.dom/max*85);
+    const fH = Math.round(t.for/max*85);
+    return `<div class="time-col">
+      <div class="time-bar-wrap">
+        <div style="width:10px;height:${dH}px;background:#378ADD;border-radius:2px 2px 0 0"></div>
+        <div style="width:10px;height:${fH}px;background:#1D9E75;border-radius:2px 2px 0 0"></div>
+      </div>
+      <div class="time-lbl ${isPeak?'time-peak':''}">${t.h.replace('시','')}${isPeak?'<br>★':''}</div>
+    </div>`;
+  }).join('');
+}
+
+function destroyChart(id) {
+  if(chartInstances[id]){chartInstances[id].destroy();delete chartInstances[id];}
+}
+
+function renderTrendChart(monthKeys) {
+  const MONTHLY = getMonthly();
+  destroyChart('trendChart');
+  const ctx = document.getElementById('trendChart');
+  if(!ctx) return;
+  const labels = monthKeys.map(k=>MONTHS_KR[parseInt(k.split('-')[1])-1]);
+  const data = monthKeys.map(k=>MONTHLY[k].rows.length);
+  const colors = monthKeys.map((_,i)=>i===monthKeys.length-1?'#185FA5':i===monthKeys.length-2?'#378ADD':'#B5D4F4');
+  chartInstances['trendChart'] = new Chart(ctx,{
+    type:'bar',
+    data:{labels,datasets:[{label:'방문 건수',data,backgroundColor:colors,borderRadius:4,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:11}}},x:{grid:{display:false},ticks:{font:{size:12}}}}}
+  });
+}
+
+function renderAnnualPage() {
+  const MONTHLY = getMonthly();
+  const monthKeys = Object.keys(MONTHLY).sort();
+  if(!monthKeys.length){
+    document.getElementById('page-annual').innerHTML='<div class="loading">데이터가 없습니다.</div>';
+    return;
+  }
+  const allRows = monthKeys.flatMap(k=>MONTHLY[k].rows);
+  const stats = calcStats(allRows);
+  const lastKey = monthKeys[monthKeys.length-1];
+  const prevKey = monthKeys[monthKeys.length-2];
+  const lastM = parseInt(lastKey.split('-')[1]);
+  const growth = prevKey ? (((MONTHLY[lastKey].rows.length - MONTHLY[prevKey].rows.length)/MONTHLY[prevKey].rows.length)*100).toFixed(1) : null;
+  const tab = currentChTab.annual;
+  const ttab = currentTypeTab.annual;
+  const periods = monthKeys.map(k=>{
+    const rows = MONTHLY[k].rows;
+    const dates = rows.map(r=>r['날짜']).sort();
+    return dates[0]+' – '+dates[dates.length-1];
+  });
+
+  document.getElementById('page-annual').innerHTML = `
+    <div class="page-header">
+      <span class="page-badge annual">2026년 누계 (${monthKeys.map(k=>MONTHS_KR[parseInt(k.split('-')[1])-1]).join(' · ')})</span>
+      <h1 class="page-title">연간 방문객 유입경로 누계</h1>
+      <p class="page-sub">데이터 보유 기간: ${periods.join(' / ')} · 총 ${allRows.length.toLocaleString()}건</p>
+    </div>
+    <div class="metrics">
+      <div class="metric-card"><div class="metric-label">총 응답</div><div class="metric-value">${allRows.length.toLocaleString()}건</div><div class="metric-note">누계 합산</div></div>
+      <div class="metric-card"><div class="metric-label">국내 방문객</div><div class="metric-value">${(stats.domestic/stats.total*100).toFixed(1)}%</div><div class="metric-note">${stats.domestic.toLocaleString()}건</div></div>
+      <div class="metric-card"><div class="metric-label">외국인 방문객</div><div class="metric-value">${(stats.foreign/stats.total*100).toFixed(1)}%</div><div class="metric-note">${stats.foreign.toLocaleString()}건</div></div>
+      <div class="metric-card"><div class="metric-label">누계 1위 채널</div><div class="metric-value">${stats.top1_ch}</div><div class="metric-note">${stats.top1_pct}%</div></div>
+      ${growth!==null?`<div class="metric-card"><div class="metric-label">최근월 (${MONTHS_KR[lastM-1]})</div><div class="metric-value">${MONTHLY[lastKey].rows.length}건</div><div class="metric-note class="${growth>0?'metric-up':'metric-down'}">${growth>0?'▲':'▼'} ${Math.abs(growth)}% 전월 대비</div></div>`:''}
+    </div>
+    <div style="margin-bottom:16px"><div class="card">
+      <div class="card-header"><span class="card-title">월별 데이터 현황 — 클릭하면 상세 페이지로</span></div>
+      <div class="month-calendar">
+        ${MONTHS_KR.map((name,i)=>{
+          const m=i+1, key=`2026-${m}`, has=MONTHLY[key];
+          return `<div class="cal-month ${has?'has-data':'no-data'}" onclick="${has?`goMonthly(${m})`:''}">
+            <div class="cal-month-name">${name}</div>
+            <div class="cal-count">${has?MONTHLY[key].rows.length+'건':'—'}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div></div>
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-header"><span class="card-title">유입 채널 누계</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="more-btn" onclick="openChModal(calcStats(Object.keys(getMonthly()).flatMap(k=>getMonthly()[k].rows)),'${tab}','유입 채널 전체 순위 (누계)')">전체보기</button>
+            <div class="tab-group">
+            <button class="tab-btn ${tab==='all'?'active':''}" onclick="setChTab('annual','all')">전체</button>
+            <button class="tab-btn ${tab==='dom'?'active':''}" onclick="setChTab('annual','dom')">국내</button>
+            <button class="tab-btn ${tab==='for'?'active':''}" onclick="setChTab('annual','for')">국외</button>
+          </div></div>
+        </div>
+        <div class="bar-list" id="annual-bars"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">월별 방문 추이</span></div>
+        <div style="position:relative;height:200px"><canvas id="trendChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">국적 구성 누계 상위 10</span>
+          <button class="more-btn" onclick="openNatModal(calcStats(Object.keys(getMonthly()).flatMap(k=>getMonthly()[k].rows)),'국적 구성 전체 순위 (누계)')">전체보기</button>
+        </div>
+        <div class="nat-list" id="annual-nat"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">방문 유형 누계</span>
+          <div class="tab-group">
+            <button class="tab-btn ${ttab==='all'?'active':''}" onclick="setTypeTab('annual','all')">전체</button>
+            <button class="tab-btn ${ttab==='dom'?'active':''}" onclick="setTypeTab('annual','dom')">국내</button>
+            <button class="tab-btn ${ttab==='for'?'active':''}" onclick="setTypeTab('annual','for')">국외</button>
+          </div>
+        </div>
+        <div class="type-grid" id="annual-types"></div>
+      </div>
+      <div class="card span-2">
+        <div class="card-header">
+          <span class="card-title">현장 메모 — 특이사항</span>
+          <span id="annual-memo-count" style="font-size:11px;color:var(--gray-500)"></span>
+        </div>
+        <div class="memo-filter" id="annual-memo-filter"></div>
+        <div class="memo-feed" id="annual-memos"></div>
+      </div>
+    </div>`;
+
+  renderBars('annual-bars', null, tab, stats);
+  renderNat('annual-nat', stats.nat, 10);
+  renderTypes('annual-types', stats, ttab);
+  setTimeout(()=>renderTrendChart(monthKeys), 50);
+
+  // 메모 섹션
+  const allRows2 = monthKeys.flatMap(k=>MONTHLY[k].rows);
+  renderMemoSection('annual-memos', allRows2);
+}
+
+function renderMonthlyPage(m) {
+  const MONTHLY = getMonthly();
+  const key = `2026-${m}`;
+  if(!MONTHLY[key]){document.getElementById('page-monthly').innerHTML='<div class="loading">데이터가 없습니다.</div>';return;}
+  const rows = MONTHLY[key].rows;
+  const stats = calcStats(rows);
+  window._monthlyStats = stats;
+  const monthKeys = Object.keys(MONTHLY).sort();
+  const idx = monthKeys.indexOf(key);
+  const prevKey = monthKeys[idx-1];
+  const nextKey = monthKeys[idx+1];
+  const prevM = prevKey?parseInt(prevKey.split('-')[1]):null;
+  const nextM = nextKey?parseInt(nextKey.split('-')[1]):null;
+  const growth = prevKey?(((rows.length-MONTHLY[prevKey].rows.length)/MONTHLY[prevKey].rows.length)*100).toFixed(1):null;
+  const tab = currentChTab.monthly;
+  const ttab = currentTypeTab.monthly;
+  const dates = rows.map(r=>r['날짜']).sort();
+
+  document.getElementById('page-monthly').innerHTML = `
+    <div class="page-header">
+      <span class="page-badge monthly">${MONTHS_KR[m-1]} 상세</span>
+      <h1 class="page-title">${MONTHS_KR[m-1]} 방문객 유입경로</h1>
+      <p class="page-sub">${dates[0]} – ${dates[dates.length-1]} · ${rows.length}건</p>
+      <div class="month-nav">
+        <button class="month-nav-btn" onclick="goMonthly(${prevM})" ${!prevM?'disabled':''}>← ${prevM?MONTHS_KR[prevM-1]:'이전'}</button>
+        <span class="month-nav-current">${MONTHS_KR[m-1]}</span>
+        <button class="month-nav-btn" onclick="goMonthly(${nextM})" ${!nextM?'disabled':''}>→ ${nextM?MONTHS_KR[nextM-1]:'다음'}</button>
+      </div>
+    </div>
+    <div class="metrics">
+      <div class="metric-card"><div class="metric-label">총 응답</div><div class="metric-value">${rows.length}건</div><div class="metric-note">${dates[0].substring(5)} – ${dates[dates.length-1].substring(5)}</div></div>
+      <div class="metric-card"><div class="metric-label">국내</div><div class="metric-value">${(stats.domestic/stats.total*100).toFixed(1)}%</div><div class="metric-note">${stats.domestic}건</div></div>
+      <div class="metric-card"><div class="metric-label">국외</div><div class="metric-value">${(stats.foreign/stats.total*100).toFixed(1)}%</div><div class="metric-note">${stats.foreign}건</div></div>
+      <div class="metric-card"><div class="metric-label">1위 채널</div><div class="metric-value">${stats.top1_ch}</div><div class="metric-note">${stats.top1_pct}%</div></div>
+      ${growth!==null?`<div class="metric-card"><div class="metric-label">전월 대비</div><div class="metric-value">${rows.length}건</div><div class="metric-note ${growth>0?'metric-up':'metric-down'}">${growth>0?'▲':'▼'} ${Math.abs(growth)}%</div></div>`:''}
+    </div>
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-header"><span class="card-title">유입 채널 분석</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="more-btn" onclick="openChModal(window._monthlyStats,'${tab}','${MONTHS_KR[m-1]} 유입 채널 전체 순위')">전체보기</button>
+            <div class="tab-group">
+              <button class="tab-btn ${tab==='all'?'active':''}" onclick="setChTab('monthly','all')">전체</button>
+              <button class="tab-btn ${tab==='dom'?'active':''}" onclick="setChTab('monthly','dom')">국내</button>
+              <button class="tab-btn ${tab==='for'?'active':''}" onclick="setChTab('monthly','for')">국외</button>
+            </div>
+          </div>
+        </div>
+        <div class="bar-list" id="monthly-bars"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">국적 구성 상위 8</span>
+          <button class="more-btn" onclick="openNatModal(window._monthlyStats,'${MONTHS_KR[m-1]} 국적 구성 전체 순위')">전체보기</button>
+        </div>
+        <div class="nat-list" id="monthly-nat"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">방문 유형 분석</span>
+          <div class="tab-group">
+            <button class="tab-btn ${ttab==='all'?'active':''}" onclick="setTypeTab('monthly','all')">전체</button>
+            <button class="tab-btn ${ttab==='dom'?'active':''}" onclick="setTypeTab('monthly','dom')">국내</button>
+            <button class="tab-btn ${ttab==='for'?'active':''}" onclick="setTypeTab('monthly','for')">국외</button>
+          </div>
+        </div>
+        <div class="type-grid" id="monthly-types"></div>
+      </div>
+      ${stats.hasTime?`
+      <div class="card">
+        <div class="card-header"><span class="card-title">시간대별 방문</span></div>
+        <div class="time-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#378ADD"></div>국내</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div>국외</div>
+        </div>
+        <div class="time-chart" id="monthly-time"></div>
+      </div>`:`
+      <div class="card" style="display:flex;align-items:center;justify-content:center;min-height:160px">
+        <p style="color:var(--gray-500);font-size:13px;text-align:center">이 달은 시간 데이터가 없어요<br><span style="font-size:11px">시간 기록이 있는 달에 자동으로 표시됩니다</span></p>
+      </div>`}
+      <div class="card span-2">
+        <div class="card-header">
+          <span class="card-title">현장 메모 — 특이사항</span>
+          <span id="monthly-memo-count" style="font-size:11px;color:var(--gray-500)"></span>
+        </div>
+        <div class="memo-filter" id="monthly-memo-filter"></div>
+        <div class="memo-feed" id="monthly-memos"></div>
+      </div>
+    </div>`;
+
+  renderBars('monthly-bars', null, tab, stats);
+  renderNat('monthly-nat', stats.nat, 8);
+  renderTypes('monthly-types', stats, ttab);
+  if(stats.hasTime) renderTime('monthly-time', stats.timeArr);
+  renderMemoSection('monthly-memos', rows);
+}
+
+function getBranchTotalStats(branch) {
+  const monthly = DATA_STORE[branch].monthly;
+  const monthKeys = Object.keys(monthly).sort();
+  const allRows = monthKeys.flatMap(k=>monthly[k].rows);
+  return { stats: calcStats(allRows), monthKeys, allRows };
+}
+
+function compareBarRow(label, hVal, mVal, maxVal, unit='%') {
+  return `
+    <div style="display:grid;grid-template-columns:90px 1fr 1fr;gap:10px;align-items:center;margin-bottom:10px">
+      <span style="font-size:12px;color:var(--gray-700)">${label}</span>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div style="flex:1;height:8px;background:var(--gray-100);border-radius:4px;overflow:hidden"><div style="height:100%;width:${maxVal?(hVal/maxVal*100).toFixed(1):0}%;background:#185FA5;border-radius:4px"></div></div>
+        <span style="font-size:11px;color:var(--gray-500);width:42px;text-align:right">${hVal}${unit}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div style="flex:1;height:8px;background:var(--gray-100);border-radius:4px;overflow:hidden"><div style="height:100%;width:${maxVal?(mVal/maxVal*100).toFixed(1):0}%;background:#993556;border-radius:4px"></div></div>
+        <span style="font-size:11px;color:var(--gray-500);width:42px;text-align:right">${mVal}${unit}</span>
+      </div>
+    </div>`;
+}
+
+function renderCompareBody(hStats, hCount, mStats, mCount, extraTrendHtml) {
+  const maxCh = Math.max(hStats.ch_all[0]?.pct||0, mStats.ch_all[0]?.pct||0, 1);
+  const chNames = [...new Set([...hStats.ch_all.slice(0,8).map(c=>c.name), ...mStats.ch_all.slice(0,8).map(c=>c.name)])];
+  const chCompareRows = chNames.map(name => {
+    const hc = hStats.ch_all.find(c=>c.name===name)?.pct || 0;
+    const mc = mStats.ch_all.find(c=>c.name===name)?.pct || 0;
+    return compareBarRow(name, hc, mc, maxCh);
+  }).join('');
+
+  // 채널 국내/국외 분리 비교
+  const domNames = [...new Set([...hStats.ch_dom.slice(0,6).map(c=>c.name), ...mStats.ch_dom.slice(0,6).map(c=>c.name)])];
+  const maxDom = Math.max(hStats.ch_dom[0]?.pct||0, mStats.ch_dom[0]?.pct||0, 1);
+  const domRows = domNames.map(name => {
+    const hc = hStats.ch_dom.find(c=>c.name===name)?.pct || 0;
+    const mc = mStats.ch_dom.find(c=>c.name===name)?.pct || 0;
+    return compareBarRow(name, hc, mc, maxDom);
+  }).join('');
+
+  const forNames = [...new Set([...hStats.ch_for.slice(0,6).map(c=>c.name), ...mStats.ch_for.slice(0,6).map(c=>c.name)])];
+  const maxFor = Math.max(hStats.ch_for[0]?.pct||0, mStats.ch_for[0]?.pct||0, 1);
+  const forRows = forNames.map(name => {
+    const hc = hStats.ch_for.find(c=>c.name===name)?.pct || 0;
+    const mc = mStats.ch_for.find(c=>c.name===name)?.pct || 0;
+    return compareBarRow(name, hc, mc, maxFor);
+  }).join('');
+
+  const natNames = [...new Set([...hStats.nat.slice(0,6).map(n=>n.name), ...mStats.nat.slice(0,6).map(n=>n.name)])];
+  const maxNat = Math.max(hStats.nat[0]?.pct||0, mStats.nat[0]?.pct||0, 1);
+  const natRows = natNames.map(name => {
+    const hv = hStats.nat.find(n=>n.name===name)?.pct || 0;
+    const mv = mStats.nat.find(n=>n.name===name)?.pct || 0;
+    return compareBarRow(name, hv, mv, maxNat);
+  }).join('');
+
+  // 모달에서 참조할 수 있도록 비교 stats를 전역에 저장 (return 이전에 실행되어야 함)
+  window._compareHStats = hStats;
+  window._compareMStats = mStats;
+
+  return `
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-header"><span class="card-title">홍대점</span></div>
+        <div class="metrics" style="grid-template-columns:1fr 1fr;margin-bottom:0">
+          <div class="metric-card"><div class="metric-label">총 응답</div><div class="metric-value">${hCount}건</div></div>
+          <div class="metric-card"><div class="metric-label">국내</div><div class="metric-value">${hStats.total?(hStats.domestic/hStats.total*100).toFixed(1):0}%</div></div>
+          <div class="metric-card"><div class="metric-label">국외</div><div class="metric-value">${hStats.total?(hStats.foreign/hStats.total*100).toFixed(1):0}%</div></div>
+          <div class="metric-card"><div class="metric-label">1위 채널</div><div class="metric-value">${hStats.top1_ch}</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">명동점</span></div>
+        <div class="metrics" style="grid-template-columns:1fr 1fr;margin-bottom:0">
+          <div class="metric-card"><div class="metric-label">총 응답</div><div class="metric-value">${mCount}건</div></div>
+          <div class="metric-card"><div class="metric-label">국내</div><div class="metric-value">${mStats.total?(mStats.domestic/mStats.total*100).toFixed(1):0}%</div></div>
+          <div class="metric-card"><div class="metric-label">국외</div><div class="metric-value">${mStats.total?(mStats.foreign/mStats.total*100).toFixed(1):0}%</div></div>
+          <div class="metric-card"><div class="metric-label">1위 채널</div><div class="metric-value">${mStats.top1_ch}</div></div>
+        </div>
+      </div>
+
+      <div class="card span-2">
+        <div class="card-header">
+          <span class="card-title">유입 채널 비교 (전체 비율 기준)</span>
+          <button class="more-btn" onclick="openCompareChModal(window._compareHStats, window._compareMStats, '유입 채널 전체 순위 비교')">전체보기</button>
+        </div>
+        ${chCompareRows || '<p style="color:var(--gray-500);font-size:13px">데이터가 없습니다.</p>'}
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">국내 방문객 채널 비교</span></div>
+        ${domRows || '<p style="color:var(--gray-500);font-size:13px">데이터가 없습니다.</p>'}
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">국외 방문객 채널 비교</span></div>
+        ${forRows || '<p style="color:var(--gray-500);font-size:13px">데이터가 없습니다.</p>'}
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">방문 유형 비교</span></div>
+        ${['커플','가족','친구','1인'].map(t => {
+          const hv = hStats.types_all.find(x=>x.name===t)?.pct || 0;
+          const mv = mStats.types_all.find(x=>x.name===t)?.pct || 0;
+          return compareBarRow(t, hv, mv, 50);
+        }).join('')}
+      </div>
+
+      ${extraTrendHtml}
+
+      <div class="card span-2">
+        <div class="card-header">
+          <span class="card-title">국적 구성 비교 (상위 6)</span>
+          <button class="more-btn" onclick="openCompareNatModal(window._compareHStats, window._compareMStats, '국적 구성 전체 순위 비교')">전체보기</button>
+        </div>
+        ${natRows || '<p style="color:var(--gray-500);font-size:13px">데이터가 없습니다.</p>'}
+      </div>
+    </div>`;
+}
+
+function renderComparePage() {
+  const h = getBranchTotalStats('hongdae');
+  const m = getBranchTotalStats('myeongdong');
+  const allMonthKeys = [...new Set([...h.monthKeys, ...m.monthKeys])].sort();
+
+  const trendHtml = `
+      <div class="card">
+        <div class="card-header"><span class="card-title">월별 방문 추이 비교</span></div>
+        <div style="position:relative;height:200px"><canvas id="compareTrendChart"></canvas></div>
+      </div>`;
+
+  document.getElementById('page-compare').innerHTML = `
+    <div class="page-header">
+      <span class="page-badge annual">통합 비교 — 연간 누계</span>
+      <h1 class="page-title">홍대점 · 명동점 비교 분석</h1>
+      <p class="page-sub">데이터 보유: ${allMonthKeys.map(k=>MONTHS_KR[parseInt(k.split('-')[1])-1]).join(' · ')}</p>
+      <div class="time-legend" style="margin-top:10px">
+        <div class="legend-item"><div class="legend-dot" style="background:#185FA5"></div>홍대점</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#993556"></div>명동점</div>
+      </div>
+    </div>
+    ${renderCompareBody(h.stats, h.allRows.length, m.stats, m.allRows.length, trendHtml)}`;
+
+  setTimeout(() => {
+    destroyChart('compareTrendChart');
+    const ctx = document.getElementById('compareTrendChart');
+    if (!ctx) return;
+    const labels = allMonthKeys.map(k=>MONTHS_KR[parseInt(k.split('-')[1])-1]);
+    const hData = allMonthKeys.map(k=>DATA_STORE.hongdae.monthly[k]?.rows.length || 0);
+    const mData = allMonthKeys.map(k=>DATA_STORE.myeongdong.monthly[k]?.rows.length || 0);
+    chartInstances['compareTrendChart'] = new Chart(ctx, {
+      type:'bar',
+      data:{ labels, datasets:[
+        {label:'홍대점', data:hData, backgroundColor:'#185FA5', borderRadius:4, borderSkipped:false},
+        {label:'명동점', data:mData, backgroundColor:'#993556', borderRadius:4, borderSkipped:false}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:11}}},x:{grid:{display:false},ticks:{font:{size:12}}}}}
+    });
+  }, 50);
+}
+
+function renderCompareMonthlyPage(mo) {
+  if (!mo) {
+    document.getElementById('page-compare').innerHTML = '<div class="loading">이 기간에는 데이터가 없습니다.</div>';
+    return;
+  }
+  const key = `2026-${mo}`;
+  const hRows = DATA_STORE.hongdae.monthly[key]?.rows || [];
+  const mRows = DATA_STORE.myeongdong.monthly[key]?.rows || [];
+  const hStats = calcStats(hRows);
+  const mStats = calcStats(mRows);
+
+  const allKeys = [...new Set([...Object.keys(DATA_STORE.hongdae.monthly), ...Object.keys(DATA_STORE.myeongdong.monthly)])].sort();
+  const idx = allKeys.indexOf(key);
+  const prevKey = allKeys[idx-1];
+  const nextKey = allKeys[idx+1];
+  const prevM = prevKey ? parseInt(prevKey.split('-')[1]) : null;
+  const nextM = nextKey ? parseInt(nextKey.split('-')[1]) : null;
+
+  document.getElementById('page-compare').innerHTML = `
+    <div class="page-header">
+      <span class="page-badge monthly">통합 비교 — ${MONTHS_KR[mo-1]} 상세</span>
+      <h1 class="page-title">${MONTHS_KR[mo-1]} 홍대점 · 명동점 비교</h1>
+      <p class="page-sub">홍대점 ${hRows.length}건 · 명동점 ${mRows.length}건</p>
+      <div class="time-legend" style="margin-top:6px">
+        <div class="legend-item"><div class="legend-dot" style="background:#185FA5"></div>홍대점</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#993556"></div>명동점</div>
+      </div>
+      <div class="month-nav">
+        <button class="month-nav-btn" onclick="goMonthly(${prevM})" ${!prevM?'disabled':''}>← ${prevM?MONTHS_KR[prevM-1]:'이전'}</button>
+        <span class="month-nav-current">${MONTHS_KR[mo-1]}</span>
+        <button class="month-nav-btn" onclick="goMonthly(${nextM})" ${!nextM?'disabled':''}>→ ${nextM?MONTHS_KR[nextM-1]:'다음'}</button>
+      </div>
+    </div>
+    ${renderCompareBody(hStats, hRows.length, mStats, mRows.length, '')}`;
+}
+
+function setChTab(page, tab) {
+  const MONTHLY = getMonthly();
+  currentChTab[page] = tab;
+  if(page==='annual'){
+    const stats = calcStats(Object.keys(MONTHLY).flatMap(k=>MONTHLY[k].rows));
+    renderBars('annual-bars', null, tab, stats);
+  } else {
+    renderBars('monthly-bars', null, tab, calcStats(MONTHLY[`2026-${currentMonth}`].rows));
+  }
+}
+function setTypeTab(page, tab) {
+  const MONTHLY = getMonthly();
+  currentTypeTab[page] = tab;
+  if(page==='annual'){
+    const stats = calcStats(Object.keys(MONTHLY).flatMap(k=>MONTHLY[k].rows));
+    renderTypes('annual-types', stats, tab);
+  } else {
+    renderTypes('monthly-types', calcStats(MONTHLY[`2026-${currentMonth}`].rows), tab);
+  }
+}
+
+function openChModal(stats, tab, title) {
+  const list = tab==='dom'?stats.ch_dom:tab==='for'?stats.ch_for:stats.ch_all;
+  const max = Math.max(...list.map(d=>d.pct));
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-sub').textContent = `전체 ${list.length}개 채널 · 응답 ${list.reduce((s,d)=>s+d.cnt,0)}건`;
+  document.getElementById('modal-content').innerHTML = `<div class="bar-list">${
+    list.map((d,i)=>`
+      <div class="bar-row">
+        <span class="bar-rank">${i+1}</span>
+        <span class="bar-label" title="${d.name}" style="width:90px">${d.name}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${(d.pct/max*100).toFixed(1)}%;background:${d.color||'#888780'}"></div></div>
+        <span class="bar-pct">${d.pct}%</span>
+        <span class="bar-cnt">${d.cnt}건</span>
+      </div>`).join('')
+  }</div>`;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function openNatModal(stats, title) {
+  const list = stats.nat;
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-sub').textContent = `전체 ${list.length}개 국적 · 총 ${list.reduce((s,n)=>s+n.cnt,0)}건`;
+  document.getElementById('modal-content').innerHTML = `<div class="nat-list">${
+    list.map((n,i)=>`
+      <div class="nat-row">
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--gray-500);width:20px;text-align:right">${i+1}</span>
+          <span>${n.name}</span>
+        </span>
+        <span class="nat-val">${n.cnt}건 · ${n.pct}%</span>
+      </div>`).join('')
+  }</div>`;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function openCompareChModal(hStats, mStats, title) {
+  const hList = hStats.ch_all;
+  const mList = mStats.ch_all;
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-sub').textContent = `홍대점 ${hList.reduce((s,d)=>s+d.cnt,0)}건 · 명동점 ${mList.reduce((s,d)=>s+d.cnt,0)}건`;
+
+  const renderList = (list, color) => {
+    const max = Math.max(...list.map(d=>d.pct), 1);
+    return list.map((d,i)=>`
+      <div class="bar-row">
+        <span class="bar-rank">${i+1}</span>
+        <span class="bar-label" title="${d.name}" style="width:90px">${d.name}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${(d.pct/max*100).toFixed(1)}%;background:${color}"></div></div>
+        <span class="bar-pct">${d.pct}%</span>
+        <span class="bar-cnt">${d.cnt}건</span>
+      </div>`).join('');
+  };
+
+  document.getElementById('modal-content').innerHTML = `
+    <p style="font-size:11px;color:#185FA5;font-weight:600;margin-bottom:8px">홍대점</p>
+    <div class="bar-list" style="margin-bottom:18px">${renderList(hList, '#185FA5') || '<p style="color:var(--gray-500);font-size:13px">데이터가 없습니다.</p>'}</div>
+    <p style="font-size:11px;color:#993556;font-weight:600;margin-bottom:8px">명동점</p>
+    <div class="bar-list">${renderList(mList, '#993556') || '<p style="color:var(--gray-500);font-size:13px">데이터가 없습니다.</p>'}</div>
+  `;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function openCompareNatModal(hStats, mStats, title) {
+  const hList = hStats.nat;
+  const mList = mStats.nat;
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-sub').textContent = `홍대점 ${hList.reduce((s,n)=>s+n.cnt,0)}건 · 명동점 ${mList.reduce((s,n)=>s+n.cnt,0)}건`;
+
+  const renderList = (list) => list.map((n,i)=>`
+      <div class="nat-row">
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--gray-500);width:20px;text-align:right">${i+1}</span>
+          <span>${n.name}</span>
+        </span>
+        <span class="nat-val">${n.cnt}건 · ${n.pct}%</span>
+      </div>`).join('');
+
+  document.getElementById('modal-content').innerHTML = `
+    <p style="font-size:11px;color:#185FA5;font-weight:600;margin-bottom:8px">홍대점</p>
+    <div class="nat-list" style="margin-bottom:18px">${renderList(hList) || '<p style="color:var(--gray-500);font-size:13px">데이터가 없습니다.</p>'}</div>
+    <p style="font-size:11px;color:#993556;font-weight:600;margin-bottom:8px">명동점</p>
+    <div class="nat-list">${renderList(mList) || '<p style="color:var(--gray-500);font-size:13px">데이터가 없습니다.</p>'}</div>
+  `;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.add('hidden');
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') document.getElementById('modal-overlay').classList.add('hidden'); });
+
+// ===== 메모 분류 =====
+const NAT_KW = ['한국','미국','프랑스','독일','영국','일본','중국','호주','캐나다','싱가포르','홍콩','타이완','필리핀','베트남','태국','인도네시아','말레이시아','러시아','이탈리아','폴란드','스페인','오스트리아','체코','덴마크','노르웨이','스웨덴','핀란드','그리스','포르투갈','터키','사우디아라비아','뉴질랜드','인도','시드니','런던','파리','베를린','도쿄','상하이','캘리포니아','동아시아','싱가폴','이란'];
+const SKIP_EXACT = ['주렁주렁','네이버 예약'];
+
+const MEMO_CATS = [
+  {key:'workin', label:'🏪 워크인 상세', color:'cat-workin',
+   test: m => /빈티지|간판|지나가다|걷다가|등신대|내려옴|근무지|위에 있다가/.test(m)},
+  {key:'new', label:'🤖 신규·디지털 채널', color:'cat-new',
+   test: m => /챗지피티|chat gpt|chatgpt|유튜브|트래볼루션|투어 어플|홍콩 투어|AI|인공지능|카카오맵|인터넷/i.test(m)},
+  {key:'viral', label:'💬 바이럴·특이', color:'cat-viral',
+   test: m => /바이럴|베스트로|외국인 사이|홍대에오면|인스타.*틱톡|틱톡.*인스타|검색해봄|cat cafe|한분은|복합/.test(m)},
+  {key:'return', label:'🔄 재방문 스토리', color:'cat-return',
+   test: m => /년 전|년전|재방문|25년도|전에 방문/.test(m)},
+  {key:'myeongdong', label:'🏢 타 지점 연계', color:'cat-myeongdong',
+   test: m => /명동|명동점|홍대점|다른 지점|타 지점/.test(m)},
 ];
-const basic=[['date','관찰 일자','date'],['observer','관찰자 이름','text'],['location','지점','select',['선택하세요','홍대','명동']],['role','관찰자 역할','select',['부점장 (입장부터 퇴장)','운영 포지션 (마을 입장부터)','캣팀','베캠','기타']],['customerType','고객 유형','select',['가족','연인','친구','기타']],['nationality','고객 유형 2','select',['내국인','외국인','혼합','확인 불가']],['adults','성인 인원','number'],['children','어린이 인원','number'],['entryTime','입장 시각','time'],['exitTime','퇴장 시각','time']];
-const stageFields=[['activities','고객이 경험한 활동'],['interests','고객이 관심을 보인 요소'],['skipped','경험하지 않고 지나친 요소'],['positiveMoments','즐거워하거나 감탄한 순간'],['difficultMoments','불편해하거나 망설인 순간'],['staffResponse','직원의 안내 및 응대'],['afterStaff','직원 교감 이후 고객 반응'],['customerRequests','고객이 먼저 질문·요청한 내용'],['customerQuotes','고객 직접 발언 (가능하면 그대로 인용)'],['complaints','불편 사항'],['praise','칭찬 및 긍정 반응'],['requestedChanges','고객이 직접 요청한 개선'],['observedBehavior','고객행동, 개선 아이디어, 자유노트 (의견)'],['specialNotes','특이사항'],['observerInterpretation','관찰자의 해석 · 추측'],['improvementIdeas','개선 아이디어']];
-const summaryFields=[['perceivedSatisfaction','관찰하면서 느낀 고객의 만족도']];
-let records=[],currentId=null,collapsed=new Set(),saveTimer=null;
-const $=id=>document.getElementById(id);const uid=()=>globalThis.crypto?.randomUUID?.()||('id-'+Date.now()+'-'+Math.random().toString(36).slice(2));const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const newStage=(name='새 관찰 단계',qs=[])=>({id:uid(),name,questionRevision20261028:true,questionRevision20261027:true,questions:[...qs],questionAnswers:[],startTime:'',endTime:'',visitStatus:'미확인',staffInteraction:'미확인',...Object.fromEntries(stageFields.map(([k])=>[k,'']))});
-function newData(){return {schemaVersion:VERSION,id:uid(),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),basic:{date:new Date().toLocaleDateString('sv-SE'),observer:'',location:'선택하세요',role:'부점장 (입장부터 퇴장)',target:'',customerType:'가족',nationality:'내국인',adults:2,children:0,timeSlot:'',entryTime:'',exitTime:'',observationStart:'',observationEnd:''},stages:templates.map(([n,q])=>newStage(n,q)),summary:Object.fromEntries(summaryFields.map(([k])=>[k,'']))}};
-function active(){return records.find(r=>r.id===currentId)}
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(records));$('saveStatus').textContent='저장됨 · '+new Date().toLocaleTimeString('ko-KR');}catch(e){$('saveStatus').textContent='⚠ 저장 실패: 용량/설정 확인';alert('자동 저장에 실패했습니다. JSON으로 백업하세요.');}}
-function changed(){const r=active();if(!r)return;r.updatedAt=new Date().toISOString();$('saveStatus').textContent='저장 중…';clearTimeout(saveTimer);saveTimer=setTimeout(()=>{persist();renderRecordSelect()},350)}
-function mins(a,b){if(!a||!b)return null;let x=a.split(':').map(Number),y=b.split(':').map(Number);let n=y[0]*60+y[1]-x[0]*60-x[1];if(n<0)n+=1440;return n}function duration(a,b){const n=mins(a,b);return n===null?'미입력':`${Math.floor(n/60)}시간 ${n%60}분`}
-function renderRecordSelect(){let sel=$('recordSelect');sel.innerHTML=records.map(r=>`<option value="${esc(r.id)}">${isSubmitted(r)?'✅ 제출됨':'⬜ 미제출'} · ${esc(r.basic.date||'날짜 미입력')} · ${esc(r.basic.location&&r.basic.location!=='선택하세요'?r.basic.location:'지점 미선택')} · ${esc(r.basic.observer||'관찰자 미입력')}</option>`).join('');sel.value=currentId}
-function renderBasic(){const r=active();$('basicFields').innerHTML=basic.map(([key,label,type,options])=>`<label class="field"><span>${label}</span>${type==='select'?`<select data-basic="${key}">${options.map(v=>`<option value="${esc(v)}" ${r.basic[key]===v?'selected':''}>${esc(v)}</option>`).join('')}</select>`:`<input data-basic="${key}" type="${type}" ${type==='number'?'min="0" max="99"':''} value="${esc(r.basic[key])}" placeholder="${label}">`}</label>`).join('');renderDurations()}
-function renderDurations(){const b=active().basic;$('durationStats').innerHTML=`<span>총 체류 시간: <b>${duration(b.entryTime,b.exitTime)}</b></span><span>총 고객 인원: <b>${Number(b.adults||0)+Number(b.children||0)}명</b></span>`}
-function stageHtml(s,i){let closed=collapsed.has(s.id);return `<article class="stage ${closed?'collapsed':''}" data-stage="${esc(s.id)}"><div class="stagehead"><div class="row"><button class="btn sm" data-action="toggle" data-id="${esc(s.id)}">${closed?'펼치기':'접기'}</button><strong>${i+1}. ${esc(s.name)}</strong>${s.name==='입구'?'':`<span class="pill" data-duration="${esc(s.id)}">${duration(s.startTime,s.endTime)}</span>`}</div><div class="row"><button class="btn sm" data-action="up" data-id="${esc(s.id)}" ${i===0?'disabled':''}>↑</button><button class="btn sm" data-action="down" data-id="${esc(s.id)}" ${i===active().stages.length-1?'disabled':''}>↓</button><button class="btn sm danger" data-action="delete" data-id="${esc(s.id)}">삭제</button></div></div><div class="stagebody"><div class="grid">${['입구','마을 입장','고양이 교감','드링크 바 이용','방탈출 프로그램 (홍대)','퇴장'].includes(s.name)?'':`<label class="field"><span>시작 시간</span><input type="time" data-stagefield="startTime" value="${esc(s.startTime)}"></label><label class="field"><span>종료 시간</span><input type="time" data-stagefield="endTime" value="${esc(s.endTime)}"></label>${['마을 입장','고양이 교감','데일리 프로그램','퇴장'].includes(s.name)?'':`<label class="field"><span>방문 / 경험 여부</span><select data-stagefield="visitStatus">${['미확인','경험함','지나침','해당 없음'].map(v=>`<option ${s.visitStatus===v?'selected':''}>${v}</option>`).join('')}</select></label><label class="field"><span>직원 교감 여부</span><select data-stagefield="staffInteraction">${['미확인','있음','없음','해당 없음'].map(v=>`<option ${s.staffInteraction===v?'selected':''}>${v}</option>`).join('')}</select></label>`}`}</div>${s.name==='입구'?`<div class="divider"></div><h3>입구 관찰 질문</h3><div class="field"><span>1. “야옹” 인사 시 고객 반응은?</span><div class="checkrow"><label><input type="radio" name="greet-${esc(s.id)}" data-stagefield="greetingReaction" value="무반응" ${s.greetingReaction==='무반응'?'checked':''}> 무반응</label><label><input type="radio" name="greet-${esc(s.id)}" data-stagefield="greetingReaction" value="반응" ${s.greetingReaction==='반응'?'checked':''}> 반응</label></div><textarea data-stagefield="greetingDetail" placeholder="고객 반응을 구체적으로 기록하세요">${esc(s.greetingDetail||'')}</textarea><p class="help">집사가 야옹 인사를 하지 않았다면 고객에게 먼저 야옹 인사해 주기!</p></div><label class="field"><span>2. 입구 → 신발장 → 세면대 → 마을 입장 전까지 특이사항 (헷갈려 하지는 않는지)</span><textarea data-stagefield="shoeAreaNotes" placeholder="고객이 이동하거나 이용하면서 헷갈려 하는 부분을 기록하세요">${esc(s.shoeAreaNotes||'')}</textarea></label><div class="divider"></div><label class="field"><span>고객행동, 개선 아이디어, 자유노트 (의견)</span><textarea class="big" data-stagefield="observedBehavior" placeholder="실제로 관찰한 내용을 기록하세요">${esc(s.observedBehavior||'')}</textarea></label>`:['마을 입장','고양이 교감'].includes(s.name)?`<h3>${esc(s.name)} 관찰 질문</h3>${(templates.find(([name])=>name===s.name)?.[1]||s.questions).map((q,j)=>`<label class="field" style="margin:12px 0"><span>${j+1}. ${esc(q)}</span><textarea data-stagequestion="${j}" placeholder="관찰 내용을 기록하세요">${esc((s.questionAnswers||[])[j]||'')}</textarea></label>`).join('')}<label class="field"><span>고객행동, 개선 아이디어, 자유노트 (의견)</span><textarea class="big" data-stagefield="observedBehavior" placeholder="관찰 사실을 자유롭게 기록하세요">${esc(s.observedBehavior||'')}</textarea></label>`:s.name==='드링크 바 이용'?`<h3>드링크 바 이용 관찰 질문</h3>${templates[3][1].map((q,j)=>`<label class="field" style="margin:12px 0"><span>${j+1}. ${esc(q)}</span><textarea data-stagequestion="${j}" placeholder="관찰 내용을 기록하세요">${esc((s.questionAnswers||[])[j]||'')}</textarea></label>`).join('')}<label class="field"><span>고객행동, 개선 아이디어, 자유노트 (의견)</span><textarea class="big" data-stagefield="observedBehavior">${esc(s.observedBehavior||'')}</textarea></label>`:s.name==='방탈출 프로그램 (홍대)'?`<h3>방탈출 프로그램 (홍대)</h3><div class="field"><span>1. (홍대) 방탈출 프로그램에 참여하였는가?</span><div class="checkrow"><label><input type="radio" name="escape-${esc(s.id)}" data-stagefield="escapeParticipated" value="Yes" ${s.escapeParticipated==='Yes'?'checked':''}> Yes</label><label><input type="radio" name="escape-${esc(s.id)}" data-stagefield="escapeParticipated" value="No" ${s.escapeParticipated==='No'?'checked':''}> No</label></div></div>${s.escapeParticipated==='Yes'?`<div class="escape-followups">${templates[4][1].slice(1).map((q,j)=>`<div class="field" style="margin:12px 0"><span>${j+2}. ${esc(q)}</span>${j===0?`<div class="checkrow"><label><input type="radio" name="escape-complete-${esc(s.id)}" data-stagequestion="${j+1}" value="Yes" ${(s.questionAnswers||[])[j+1]==='Yes'?'checked':''}> Yes</label><label><input type="radio" name="escape-complete-${esc(s.id)}" data-stagequestion="${j+1}" value="No" ${(s.questionAnswers||[])[j+1]==='No'?'checked':''}> No</label></div>`:`<textarea data-stagequestion="${j+1}" placeholder="관찰 내용을 기록하세요">${esc((s.questionAnswers||[])[j+1]||'')}</textarea>`}</div>`).join('')}</div>`:''}<label class="field" style="margin-top:14px"><span>고객행동, 개선 아이디어, 자유노트 (의견)</span><textarea class="big" data-stagefield="observedBehavior" placeholder="고객 행동과 개선 의견을 자유롭게 기록하세요">${esc(s.observedBehavior||'')}</textarea></label>`:s.name==='데일리 프로그램'?`<h3>데일리 프로그램 관찰 질문</h3>${templates[5][1].map((q,j)=>`<label class="field" style="margin:12px 0"><span>${j+1}. ${esc(q)}</span><textarea data-stagequestion="${j}" placeholder="관찰 내용을 기록하세요">${esc((s.questionAnswers||[])[j]||'')}</textarea></label>`).join('')}<label class="field"><span>고객행동, 개선 아이디어, 자유노트 (의견)</span><textarea class="big" data-stagefield="observedBehavior">${esc(s.observedBehavior||'')}</textarea></label>`:s.name==='퇴장'?`<h3>퇴장 관찰 질문</h3>${templates[6][1].slice(0,2).map((q,j)=>`<label class="field" style="margin:12px 0"><span>${j+1}. ${esc(q)}</span><textarea data-stagequestion="${j}" placeholder="관찰 내용을 기록하세요">${esc((s.questionAnswers||[])[j]||'')}</textarea></label>`).join('')}<div class="field"><span>3. 상품샵을 들러보았는가?</span><div class="checkrow"><label><input type="radio" name="shop-${esc(s.id)}" data-stagefield="shopVisited" value="Yes" ${s.shopVisited==='Yes'?'checked':''}> Yes</label><label><input type="radio" name="shop-${esc(s.id)}" data-stagefield="shopVisited" value="No" ${s.shopVisited==='No'?'checked':''}> No</label></div></div>${s.shopVisited==='Yes'?`<div class="field" style="margin:12px 0"><span>3-1. 상품샵에서 물건을 구매하였는가?</span><div class="checkrow"><label><input type="radio" name="purchase-${esc(s.id)}" data-stagefield="shopPurchased" value="Yes" ${s.shopPurchased==='Yes'?'checked':''}> Yes</label><label><input type="radio" name="purchase-${esc(s.id)}" data-stagefield="shopPurchased" value="No" ${s.shopPurchased==='No'?'checked':''}> No</label></div></div>`:''}<div class="field" style="margin:12px 0"><span>4. 집사가 “야옹” 인사를 하였는가?</span><div class="checkrow"><label><input type="radio" name="bye-${esc(s.id)}" data-stagefield="farewellGreeting" value="Yes" ${s.farewellGreeting==='Yes'?'checked':''}> Yes</label><label><input type="radio" name="bye-${esc(s.id)}" data-stagefield="farewellGreeting" value="No" ${s.farewellGreeting==='No'?'checked':''}> No</label></div></div><label class="field"><span>고객행동, 개선 아이디어, 자유노트 (의견)</span><textarea class="big" data-stagefield="observedBehavior">${esc(s.observedBehavior||'')}</textarea></label>`:`<details style="margin-top:15px"><summary>관찰 참고 질문 (${s.questions.length}개) · 눌러서 보기/편집</summary><div class="hint">${s.questions.length?s.questions.map((q,j)=>`${j+1}. ${esc(q)}`).join('<br>'):'이 단계에는 기본 질문이 없습니다.'}</div><label class="field"><span>참고 질문 편집 (줄마다 하나씩)</span><textarea data-stagefield="questions" placeholder="관찰 참고 질문을 자유롭게 작성">${esc(s.questions.join('\n'))}</textarea></label></details><h3>고객 행동 관찰</h3><div class="notegrid">${stageFields.slice(0,5).map(f=>noteField(s,f)).join('')}</div><div class="divider"></div><h3>서비스 및 직원 교감</h3><div class="notegrid">${stageFields.slice(5,8).map(f=>noteField(s,f)).join('')}</div><div class="divider"></div><h3>고객 VOC · 직접 발언</h3><div class="notegrid">${stageFields.slice(8,12).map(f=>noteField(s,f)).join('')}</div><div class="divider"></div><h3>자유 관찰 노트</h3><p class="sub">관찰 사실과 해석·제안을 분리해 기록합니다.</p><div class="notegrid">${stageFields.slice(12).filter(([k])=>k!=='improvementIdeas').map(f=>noteField(s,f,true)).join('')}</div></div>`}${['방탈출 프로그램 (홍대)','데일리 프로그램'].includes(s.name)?'':`<div class="divider"></div><label class="field"><span>주변 환경 확인 (노후된 사인물이나 소모품, 청소 안 된 곳 체크)</span><textarea class="big" data-stagefield="environmentCheck" placeholder="해당 구역의 사인물·소모품·청결 상태를 확인하고 필요한 조치를 기록하세요">${esc(s.environmentCheck||'')}</textarea></label>`}</div></article>`}
-function noteField(s,[k,label],big=false){return `<label class="field"><span>${label}</span><textarea class="${big?'big':''}" data-stagefield="${k}" placeholder="자유롭게 기록하세요">${esc(s[k])}</textarea></label>`}
-function renderStages(){const r=active();r.stages.forEach(st=>{if(st.name==='방탈출 프로그램')st.name='방탈출 프로그램 (홍대)'});$('stages').innerHTML=r.stages.length?r.stages.map(stageHtml).join(''):'<p class="muted">아직 관찰 단계가 없습니다. 단계를 추가하세요.</p>'}
-function scoreHtml(r){const v=String((r.summary||{}).satisfactionScore||'');return `<div class="field" style="grid-column:1/-1"><span>관찰한 고객의 만족도 점수 (1점 매우 낮음 ~ 5점 매우 높음)</span><div class="checkrow">${[1,2,3,4,5].map(n=>`<label><input type="radio" name="score-${esc(r.id)}" data-summary="satisfactionScore" value="${n}" ${v===String(n)?'checked':''}> ${n}점</label>`).join('')}</div></div>`}
-function renderSummary(){const r=active();$('summaryFields').innerHTML=scoreHtml(r)+summaryFields.map(([k,l])=>`<label class="field"><span>${l}</span><textarea class="big" data-summary="${k}" placeholder="${l}">${esc(r.summary[k])}</textarea></label>`).join('')}
-function render(){renderRecordSelect();renderBasic();renderStages();renderSummary();buildPrint()}
-function download(name,obj){const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000)}
-function filename(r){return `SBS_${(r.basic.date||'미입력').replace(/[^\d-]/g,'')}_${(r.basic.location||'관찰').replace(/[\\/:*?"<>|]/g,'_')}`}
-function fieldLine(label,value){if(value===null||value===undefined||String(value).trim()===''||value==='미확인'||value==='미입력')return '';return `<div class="report-label">${esc(label)}</div><div class="report-field">${esc(value)}</div>`}
-function buildPrint(){const r=active(),b=r.basic;let out=`<h1>팔로우 SBS · 고객 경험 관찰 보고서</h1><div class="report-section"><h2>기본 정보</h2>`;for(const [k,label] of basic){out+=fieldLine(label,b[k])}if(b.entryTime&&b.exitTime)out+=fieldLine('총 체류 시간',duration(b.entryTime,b.exitTime));out+='</div>';r.stages.forEach((s,i)=>{let body=fieldLine('관찰 단계',s.name)+(['고양이 교감','마을 입장'].includes(s.name)?'':fieldLine('시작 시각',s.startTime)+fieldLine('종료 시각',s.endTime));if(s.name==='드링크 바 이용'){body=fieldLine('관찰 단계',s.name);templates[3][1].forEach((q,j)=>body+=fieldLine(q,(s.questionAnswers||[])[j]));body+=fieldLine('고객행동, 개선 아이디어, 자유노트 (의견)',s.observedBehavior)}else if(s.name==='방탈출 프로그램 (홍대)'){body=fieldLine('관찰 단계',s.name)+fieldLine('프로그램 참여 여부',s.escapeParticipated);if(s.escapeParticipated==='Yes')templates[4][1].slice(1).forEach((q,j)=>body+=fieldLine(q,(s.questionAnswers||[])[j+1]));body+=fieldLine('고객행동, 개선 아이디어, 자유노트 (의견)',s.observedBehavior)}else if(s.name==='데일리 프로그램'){body=fieldLine('관찰 단계',s.name);templates[5][1].forEach((q,j)=>body+=fieldLine(q,(s.questionAnswers||[])[j]));body+=fieldLine('고객행동, 개선 아이디어, 자유노트 (의견)',s.observedBehavior)}else if(s.name==='퇴장'){body=fieldLine('관찰 단계',s.name);templates[6][1].slice(0,2).forEach((q,j)=>body+=fieldLine(q,(s.questionAnswers||[])[j]));body+=fieldLine('상품샵을 들러보았는가?',s.shopVisited);if(s.shopVisited==='Yes')body+=fieldLine('상품샵에서 물건을 구매하였는가?',s.shopPurchased);body+=fieldLine('집사가 “야옹” 인사를 하였는가?',s.farewellGreeting)+fieldLine('고객행동, 개선 아이디어, 자유노트 (의견)',s.observedBehavior)}else if(s.name==='입구'){body=fieldLine('관찰 단계',s.name)+fieldLine('야옹 인사 반응',s.greetingReaction)+fieldLine('반응 상세',s.greetingDetail)+fieldLine('입구~신발장~세면대~마을 입장 전 특이사항',s.shoeAreaNotes)+fieldLine('고객행동, 개선 아이디어, 자유노트 (의견)',s.observedBehavior)}else{if(!['고양이 교감','마을 입장'].includes(s.name)&&s.startTime&&s.endTime)body+=fieldLine('단계 체류 시간',duration(s.startTime,s.endTime));if(['마을 입장','고양이 교감'].includes(s.name)){(templates.find(([name])=>name===s.name)?.[1]||s.questions).forEach((q,j)=>body+=fieldLine(q,(s.questionAnswers||[])[j]));body+=fieldLine('고객행동, 개선 아이디어, 자유노트 (의견)',s.observedBehavior)}else{body+=fieldLine('방문 및 경험 여부',s.visitStatus)+fieldLine('직원 교감 여부',s.staffInteraction);for(const [k,label] of stageFields)if(k!=='improvementIdeas')body+=fieldLine(k==='observedBehavior'?'고객행동, 개선 아이디어, 자유노트 (의견)':label,s[k]);}}if(!['방탈출 프로그램 (홍대)','데일리 프로그램'].includes(s.name))body+=fieldLine('주변 환경 확인 (노후된 사인물이나 소모품, 청소 안 된 곳 체크)',s.environmentCheck);out+=`<section class="report-section"><h2>${i+1}. ${esc(s.name)}</h2>${body}</section>`});let sum=fieldLine('고객 만족도 점수 (1~5)',r.summary.satisfactionScore);for(const [k,l] of summaryFields)sum+=fieldLine(l,r.summary[k]);if(sum)out+=`<section class="report-section"><h2>마무리 · 종합 관찰 및 개선 의견</h2>${sum}</section>`;$('printReport').innerHTML=out}
-function migrateRecords(list){for(const r of list){for(const st of r.stages||[]){if(st.environmentCheck===undefined)st.environmentCheck='';}if(r.basic?.role==='점장 (입장부터 퇴장)')r.basic.role='부점장 (입장부터 퇴장)';for(const st of r.stages||[]){if(st.name==='마을 입장'&&!st.questionRevision20261026){if((st.questionAnswers||[]).length>=5)st.questionAnswers.splice(3,1);st.questionRevision20261026=true;}if(!st.questionRevision20261027){const idx={'마을 입장':0,'고양이 교감':1,'드링크 바 이용':1,'데일리 프로그램':1}[st.name];if(idx!==undefined&&Array.isArray(st.questionAnswers))st.questionAnswers.splice(idx,1);st.questionRevision20261027=true;}if(st.name==='마을 입장'&&!st.questionRevision20261028){if(Array.isArray(st.questionAnswers))st.questionAnswers.splice(0,1);st.questionRevision20261028=true;}const template=templates.find(([name])=>name===st.name);if(template)st.questions=[...template[1]];}}return list}
-function init(){try{const a=JSON.parse(localStorage.getItem(KEY)||'[]');records=Array.isArray(a)?migrateRecords(a.filter(valid)):[]}catch{records=[]}if(!records.length)records=[newData()];currentId=records[0].id;persist();render()}
-function valid(r){return r&&typeof r==='object'&&typeof r.id==='string'&&r.basic&&typeof r.basic==='object'&&Array.isArray(r.stages)&&r.summary&&typeof r.summary==='object'}
-$('app').addEventListener('input',e=>{const t=e.target,r=active();if(t.dataset.basic){r.basic[t.dataset.basic]=t.type==='number'?Math.max(0,Number(t.value)||0):t.value;renderDurations();changed()}else if(t.dataset.summary){r.summary[t.dataset.summary]=t.value;changed()}else if(t.dataset.stagequestion!==undefined){const id=t.closest('[data-stage]')?.dataset.stage,st=r.stages.find(x=>x.id===id);if(!st)return;st.questionAnswers=st.questionAnswers||[];st.questionAnswers[Number(t.dataset.stagequestion)]=t.value;changed()}else if(t.dataset.stagefield){const id=t.closest('[data-stage]')?.dataset.stage,s=r.stages.find(s=>s.id===id);if(!s)return;const key=t.dataset.stagefield;s[key]=key==='questions'?t.value.split('\n').map(x=>x.trim()).filter(Boolean):t.value;if(key==='startTime'||key==='endTime'){const pill=t.closest('.stage').querySelector('[data-duration]');if(pill)pill.textContent=duration(s.startTime,s.endTime)}if(key==='name')t.closest('.stage').querySelector('.stagehead strong').textContent=(r.stages.indexOf(s)+1)+'. '+s.name;changed()}});
-$('app').addEventListener('change',e=>{if(['escapeParticipated','shopVisited'].includes(e.target.dataset.stagefield)){const el=e.target.closest('[data-stage]');const st=active().stages.find(x=>x.id===el?.dataset.stage);if(st){st[e.target.dataset.stagefield]=e.target.value;if(e.target.dataset.stagefield==='shopVisited'&&e.target.value==='No')st.shopPurchased='';changed();renderStages()}return;}if(e.target.matches('select[data-basic],select[data-stagefield]')){e.target.dispatchEvent(new Event('input',{bubbles:true}))}});
-$('stages').addEventListener('click',e=>{const btn=e.target.closest('[data-action]');if(!btn)return;const id=btn.dataset.id,action=btn.dataset.action,r=active(),i=r.stages.findIndex(s=>s.id===id);if(i<0)return;if(action==='toggle'){collapsed.has(id)?collapsed.delete(id):collapsed.add(id);renderStages();return}if(action==='delete'){if(!confirm('이 관찰 단계를 삭제할까요? 기록 내용도 함께 삭제됩니다.'))return;r.stages.splice(i,1);collapsed.delete(id)}if(action==='up'&&i>0)[r.stages[i-1],r.stages[i]]=[r.stages[i],r.stages[i-1]];if(action==='down'&&i<r.stages.length-1)[r.stages[i+1],r.stages[i]]=[r.stages[i],r.stages[i+1]];changed();renderStages()});
-$('addStage').onclick=()=>{const s=newStage();active().stages.push(s);changed();renderStages();document.querySelector(`[data-stage="${s.id}"]`)?.scrollIntoView({behavior:'smooth',block:'center'})};
-$('newRecord').onclick=()=>{if(!confirm('새 관찰 기록을 생성할까요? 기존 기록은 그대로 보관됩니다.'))return;const r=newData();records.unshift(r);currentId=r.id;collapsed.clear();persist();render()};
-$('deleteRecord').onclick=()=>{if(!confirm('현재 관찰 기록을 영구 삭제할까요? 복구할 수 없습니다.'))return;records=records.filter(r=>r.id!==currentId);if(!records.length)records=[newData()];currentId=records[0].id;collapsed.clear();persist();render()};
-$('recordSelect').onchange=e=>{currentId=e.target.value;collapsed.clear();render()};
-$('exportOne').onclick=()=>{persist();download(filename(active())+'.json',{format:'follow-sbs',schemaVersion:VERSION,exportedAt:new Date().toISOString(),records:[active()]})};
-$('exportAll').onclick=()=>{persist();download('팔로우SBS_전체백업_'+new Date().toLocaleDateString('sv-SE')+'.json',{format:'follow-sbs',schemaVersion:VERSION,exportedAt:new Date().toISOString(),records})};
-$('importBtn').onclick=()=>$('importFile').click();$('importFile').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{const parsed=JSON.parse(await file.text());const list=migrateRecords(Array.isArray(parsed)?parsed:(Array.isArray(parsed.records)?parsed.records:[parsed]));if(!list.length||!list.every(valid))throw Error('지원하지 않는 JSON 형식입니다.');if(!confirm(`${list.length}개 기록을 가져올까요? 같은 ID의 기존 기록은 덮어쓰지 않고 새 ID로 복제합니다.`))return;const clones=structuredClone(list).map(r=>{r.id=uid();delete r.submittedAt;r.stages=r.stages.map(s=>({...s,id:uid(),questions:Array.isArray(s.questions)?s.questions:[]}));return r});records=[...clones,...records];currentId=clones[0].id;collapsed.clear();persist();render();alert(`${clones.length}개 기록을 가져왔습니다.`)}catch(err){alert('가져오기 실패: '+err.message)}finally{e.target.value=''}};
-$('printBtn').onclick=()=>{persist();buildPrint();window.print()};$('expandAll').onclick=()=>{collapsed.clear();renderStages()};$('collapseAll').onclick=()=>{collapsed=new Set(active().stages.map(s=>s.id));renderStages()};const isSubmitted=r=>!!r.submittedAt&&r.submittedAt>=r.updatedAt;
-const stageOf=(r,name)=>r.stages.find(s=>s.name===name)||{};
-function buildRow(r){const b=r.basic,s=r.summary||{},ent=stageOf(r,'입구'),esc_=stageOf(r,'방탈출 프로그램 (홍대)'),out=stageOf(r,'퇴장');const stay=mins(b.entryTime,b.exitTime);return {id:r.id,submittedAt:new Date().toISOString(),createdAt:r.createdAt,date:b.date,location:b.location,observer:b.observer,role:b.role,customerType:b.customerType,nationality:b.nationality,adults:b.adults,children:b.children,entryTime:b.entryTime,exitTime:b.exitTime,stayMinutes:stay===null?'':stay,satisfactionScore:s.satisfactionScore||'',perceivedSatisfaction:s.perceivedSatisfaction||'',greetingReaction:ent.greetingReaction||'',escapeParticipated:esc_.escapeParticipated||'',escapeCompleted:(esc_.questionAnswers||[])[1]||'',shopVisited:out.shopVisited||'',shopPurchased:out.shopPurchased||'',farewellGreeting:out.farewellGreeting||'',json:JSON.stringify(r)}}
-$('submitBtn').onclick=async()=>{const r=active(),b=r.basic;if(!SHEET_URL){alert('시트 연결 주소(SHEET_URL)가 아직 설정되지 않았습니다. 관리자에게 문의하세요.');return}const miss=[];if(!b.date)miss.push('관찰 일자');if(!b.observer)miss.push('관찰자 이름');if(!b.location||b.location==='선택하세요')miss.push('지점');if(miss.length){alert('제출 전에 다음 항목을 입력해 주세요: '+miss.join(', '));return}if(!confirm('이 관찰 기록을 시트로 제출할까요?\n(같은 기록을 다시 제출하면 최신 내용으로 덮어씁니다)'))return;const btn=$('submitBtn');btn.disabled=true;btn.textContent='제출 중…';try{await fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(buildRow(r))});r.submittedAt=new Date().toISOString();persist();renderRecordSelect();alert('제출했습니다.')}catch(err){alert('제출 실패: 인터넷 연결을 확인하고 다시 시도해 주세요. (기록은 이 기기에 그대로 보관되어 있습니다)')}finally{btn.disabled=false;btn.textContent='시트로 제출'}};
-window.addEventListener('beforeunload',()=>{clearTimeout(saveTimer);persist()});init();
-</script></body></html>
+
+function classifyMemo(memo) {
+  for (const cat of MEMO_CATS) {
+    if (cat.test(memo)) return cat;
+  }
+  return {key:'etc', label:'📝 기타', color:'cat-etc'};
+}
+
+function isMeaningfulMemo(memo) {
+  if (!memo || !memo.trim()) return false;
+  const m = memo.trim();
+  if (SKIP_EXACT.includes(m)) return false;
+
+  // 나라 키워드만 제거 후 남는 내용이 있는지 확인
+  let temp = m;
+  NAT_KW.forEach(k => { temp = temp.replace(new RegExp(k, 'gi'), ''); });
+  // 숫자, 특수문자, 공백 제거
+  temp = temp.replace(/[\d+/,·\s\-_()（）]/g, '').trim();
+
+  // 나라명 제거 후 2글자 이상 남아야 의미있음
+  if (temp.length < 2) return false;
+
+  // 단순 혼합/혼합만 있는 경우 제외
+  if (/^혼합$/.test(m)) return false;
+
+  return true;
+}
+
+let memoFilterState = {};
+
+function renderMemoSection(feedId, rows) {
+  const isAnnual = feedId === 'annual-memos';
+  const filterId = isAnnual ? 'annual-memo-filter' : 'monthly-memo-filter';
+  const countId = isAnnual ? 'annual-memo-count' : 'monthly-memo-count';
+
+  const memos = rows.filter(r => isMeaningfulMemo(r['메모'])).map(r => ({
+    date: r['날짜'],
+    nat: r['국가/지역'],
+    gubn: r['구분'],
+    ch: r['채널'],
+    type: r['그룹유형'],
+    memo: r['메모'].trim(),
+    cat: classifyMemo(r['메모'].trim())
+  })).sort((a,b) => b.date.localeCompare(a.date));
+
+  if (!memoFilterState[feedId]) memoFilterState[feedId] = 'all';
+
+  const catCounts = {};
+  memos.forEach(m => { catCounts[m.cat.key] = (catCounts[m.cat.key]||0)+1; });
+
+  const filterEl = document.getElementById(filterId);
+  const countEl = document.getElementById(countId);
+  if (countEl) countEl.textContent = `총 ${memos.length}건`;
+
+  const activeCats = [{key:'all', label:'전체'}, ...MEMO_CATS, {key:'etc', label:'📝 기타'}]
+    .filter(c => c.key==='all' || catCounts[c.key]);
+
+  // memos를 전역에 저장해서 필터 버튼에서 접근
+  window._memoData = window._memoData || {};
+  window._memoData[feedId] = memos;
+
+  filterEl.innerHTML = activeCats.map(c => `
+    <button class="memo-filter-btn ${memoFilterState[feedId]===c.key?'active':''}"
+      onclick="setMemoFilter('${feedId}','${filterId}','${c.key}')"
+    >${c.label} ${c.key!=='all'?`(${catCounts[c.key]||0})`:`(${memos.length})`}</button>
+  `).join('');
+
+  renderMemoFeed(feedId, memos, memoFilterState[feedId]);
+}
+
+function setMemoFilter(feedId, filterId, key) {
+  memoFilterState[feedId] = key;
+  document.querySelectorAll(`#${filterId} .memo-filter-btn`).forEach(b => {
+    b.classList.toggle('active', b.getAttribute('onclick').includes(`'${key}'`));
+  });
+  const memos = window._memoData[feedId] || [];
+  renderMemoFeed(feedId, memos, key);
+}
+
+function renderMemoFeed(feedId, memos, filter) {
+  const el = document.getElementById(feedId);
+  if (!el) return;
+  const filtered = filter==='all' ? memos : memos.filter(m=>m.cat.key===filter);
+  if (!filtered.length) {
+    el.innerHTML = '<p style="color:var(--gray-500);font-size:13px;padding:12px 0">해당 카테고리 메모가 없어요.</p>';
+    return;
+  }
+  el.innerHTML = filtered.map(m => `
+    <div class="memo-item ${m.cat.color}">
+      <div class="memo-top">
+        <span class="memo-cat-badge ${m.cat.color}">${m.cat.label}</span>
+        <span class="memo-date">${m.date}</span>
+        <span class="memo-meta">${m.gubn} · ${m.nat} · ${m.type} · ${m.ch}</span>
+      </div>
+      <div class="memo-text">${m.memo}</div>
+    </div>`).join('');
+}
+
+loadData();
+</script>
+</body>
+</html>
