@@ -194,6 +194,10 @@
           <div class="bar-list" id="bars-nat"></div>
         </div>
         <div class="card span-2">
+          <div class="card-header"><span class="card-title">외부 출입구 반응 (1층 계단 → 입구)</span><span class="cmp-note" style="margin:0">외부 출입구 단계를 기록한 건만 집계</span></div>
+          <div class="bar-list" id="bars-outside"></div>
+        </div>
+        <div class="card span-2">
           <div class="card-header"><span class="card-title">지점 비교</span><span class="cmp-note" style="margin:0">기간·역할 필터만 적용 (지점 필터 제외)</span></div>
           <div id="compare-table"></div>
         </div>
@@ -229,6 +233,8 @@
 const SBS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vStUisrt_begB6mjcKvWUNHtS-SMMJiQifV4STZHOCHaUvnq0i6-DreipeCAeREWPZqouItG3kCNTCE/pub?gid=1646021956&single=true&output=csv';
 
 const PAGE_SIZE = 30;
+const OUTSIDE = '외부 출입구 (1층 계단부터)', TURN_BACK = '머뭇거리다 되돌아감';
+const OUT_OPTS = ['바로 입장','머뭇거리며 입장', TURN_BACK];
 const BR_BADGE = {'홍대':'pf-google','명동':'pf-naver'};
 const BR_COLOR = {'홍대':'#185FA5','명동':'#1D9E75'};
 const SCORE_COLOR = {5:'#0F6E56',4:'#378ADD',3:'#BA7517',2:'#D62E2E',1:'#D62E2E'};
@@ -280,6 +286,7 @@ function normalize(rec, r, get) {
     customerType: pick(b.customerType,'customerType') || '미입력', nationality: pick(b.nationality,'nationality') || '미입력',
     adults: Number(pick(b.adults,'adults')) || 0, children: Number(pick(b.children,'children')) || 0,
     stay, score: (sc >= 1 && sc <= 5) ? sc : null,
+    outside: stg(rec, OUTSIDE).outsideReaction || '',
     greet: pick(ent.greetingReaction,'greetingReaction'),
     escPart: pick(es.escapeParticipated,'escapeParticipated'), escDone: pick((es.questionAnswers||[])[1],'escapeCompleted'),
     shop: pick(ex.shopVisited,'shopVisited'), buy: pick(ex.shopPurchased,'shopPurchased'), bye: pick(ex.farewellGreeting,'farewellGreeting'),
@@ -436,6 +443,8 @@ function renderBars() {
   document.getElementById('bars-score').innerHTML = barHtml([5,4,3,2,1].map(n => [n + '점', sc.filter(o => o.score === n).length, sc.length, SCORE_COLOR[n]]));
   document.getElementById('bars-type').innerHTML = barHtml(countRows(L,'customerType',['가족','연인','친구','기타'],'#378ADD'));
   document.getElementById('bars-nat').innerHTML = barHtml(countRows(L,'nationality',['내국인','외국인','혼합','확인 불가'],'#1D9E75'));
+  const od = L.filter(o => o.outside);
+  document.getElementById('bars-outside').innerHTML = od.length ? barHtml(OUT_OPTS.map(k => [k, od.filter(o => o.outside === k).length, od.length, k === TURN_BACK ? '#D62E2E' : (k === '바로 입장' ? '#1D9E75' : '#BA7517')])) : '<div class="empty-msg">아직 외부 출입구 기록이 없습니다.</div>';
   document.getElementById('bars-role').innerHTML = barHtml(countRows(L,'role',['부점장','운영 포지션','캣팀','베캠','기타'],'#7F77DD'));
 }
 
@@ -448,6 +457,7 @@ function renderCompare() {
     ['관찰 건수', cell(s => s.length + '건')],
     ['평균 만족도', cell(s => { const a = avg(s.filter(o => o.score).map(o => o.score)); return a == null ? '-' : a.toFixed(1) + ' / 5'; })],
     ['평균 체류 시간', cell(s => fmtMin(avg(s.filter(o => o.stay != null).map(o => o.stay))))],
+    ['외부에서 되돌아간 비율', cell(s => { const d = s.filter(o => o.outside), n = d.filter(o => o.outside === TURN_BACK).length; return d.length ? Math.round(n / d.length * 100) + '%<span class="cmp-sub">' + n + '/' + d.length + '건</span>' : '-'; })],
     ['입구 인사 반응률', cell(s => rr(s,'greet','반응','무반응'))],
     ['방탈출 참여율', cell(s => rr(s,'escPart','Yes','No'))],
     ['방탈출 완주율 (참여자)', cell(s => { const r = chainRate(s,'escPart','escDone'); return pctTxt(r) + (r.d ? '<span class="cmp-sub">' + r.n + '/' + r.d + '건</span>' : ''); })],
@@ -468,7 +478,10 @@ function line(label, val) {
 function stageDetail(s) {
   const qa = s.questionAnswers || [], qs = s.questions || [];
   let h = '';
-  if (s.name === '입구') {
+  if (s.name === OUTSIDE) {
+    const back = s.outsideReaction === TURN_BACK;
+    h += line('외부에서 입구까지 고객 반응', s.outsideReaction) + line(back ? '되돌아 가는 이유' : '특이사항', back ? s.turnBackReason : s.outsideNotes);
+  } else if (s.name === '입구') {
     h += line('야옹 인사 반응', s.greetingReaction) + line('반응 상세', s.greetingDetail) + line('입구~신발장~세면대~마을 입장 전 특이사항', s.shoeAreaNotes);
   } else if (s.name === '방탈출 프로그램 (홍대)') {
     h += line('방탈출 프로그램 참여', s.escapeParticipated);
@@ -488,7 +501,7 @@ function stageDetail(s) {
 }
 function searchText(o) {
   const r = o.rec || {};
-  return [o.observer, o.role, o.branch, o.perceived, JSON.stringify((r.stages || []).map(s => [s.questionAnswers, s.observedBehavior, s.environmentCheck, s.greetingDetail, s.shoeAreaNotes, Object.keys(STAGE_FIELDS).map(k => s[k])]))].join(' ').toLowerCase();
+  return [o.observer, o.role, o.branch, o.perceived, JSON.stringify((r.stages || []).map(s => [s.questionAnswers, s.observedBehavior, s.environmentCheck, s.greetingDetail, s.outsideNotes, s.turnBackReason, s.shoeAreaNotes, Object.keys(STAGE_FIELDS).map(k => s[k])]))].join(' ').toLowerCase();
 }
 function renderFeed() {
   const q = document.getElementById('q').value.trim().toLowerCase();
